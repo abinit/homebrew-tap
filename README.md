@@ -7,7 +7,7 @@ This is a [Homebrew](https://brew.sh/) [tap](https://docs.brew.sh/Taps) for the 
 Install Homebrew and run
 
 ```
-brew tap abinit/homebrew
+brew tap abinit/tap
 brew install abinit
 ```
 
