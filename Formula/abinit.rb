@@ -7,7 +7,9 @@ class Abinit < Formula
   # doi "10.1016/j.cpc.2016.04.003"
 
   bottle do
+    root_url "https://forge.abinit.org/fallbacks"
     cellar :any
+    sha256 6e545f15a401b7ae72b09e787868e87e5528a24defb90d5634b7ac8ea01f71ec => :mojave
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
