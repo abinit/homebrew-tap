@@ -7,7 +7,7 @@ class Abinit < Formula
   # doi "10.1016/j.cpc.2016.04.003"
 
   bottle do
-    root_url "http://forge.abinit.org/fallbacks"
+    root_url "http://forge.abinit.org/homebrew"
     cellar :any
     sha256 "6e545f15a401b7ae72b09e787868e87e5528a24defb90d5634b7ac8ea01f71ec" => :mojave
   end
