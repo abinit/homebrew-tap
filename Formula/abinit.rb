@@ -1,15 +1,15 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-8.10.2.tar.gz"
-  sha256 "4ee2e0329497bf16a9b2719fe0536cc50c5d5a07c65e18edaf15ba02251cbb73"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-8.10.3.tar.gz"
+  sha256 "ed626424b4472b93256622fbb9c7645fa3ffb693d4b444b07d488771ea7eaa75"
   # tag "chemistry"
   # doi "10.1016/j.cpc.2016.04.003"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
     cellar :any
-    sha256 "6e545f15a401b7ae72b09e787868e87e5528a24defb90d5634b7ac8ea01f71ec" => :mojave
+    sha256 "0b02d4ff91cb2b4672d1acf5f708f899bcd1e036a873f3685280b92e7f18c4e0" => :mojave
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -28,17 +28,23 @@ class Abinit < Formula
 
   needs :openmp if build.with? "openmp"
 
+# From libxc3 to libXC4
+  patch do
+    url "https://github.com/abinit/homebrew-tap/raw/master/Formula/libxc_3to4_patch.diff"
+    sha256 "ede1f6b5ab75c94fe29084443d245f1d934d896d0ac64825ef3a15214f83a7f9"
+  end
+
   def install
-    # Environment variables CC, CXX, etc. will be ignored.
+
     ENV.delete "CC"
     ENV.delete "CXX"
     ENV.delete "F77"
     ENV.delete "FC"
+
     args = %W[
-      CC=#{ENV["MPICC"]}
-      CXX=#{ENV["MPICXX"]}
-      F77=#{ENV["MPIF77"]}
-      FC=#{ENV["MPIFC"]}
+      CC=mpicc
+      CXX=mpicxx
+      FC=mpif90
       --prefix=#{prefix}
       --enable-mpi=yes
       --with-mpi-prefix=#{HOMEBREW_PREFIX}

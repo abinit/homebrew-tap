@@ -1,0 +1,1081 @@
+diff --git a/configure b/configure
+index 7d82698..1b7c0e4 100755
+--- a/configure
++++ b/configure
+@@ -37872,7 +37872,7 @@ int
+ main ()
+ {
+ int ver=100*XC_MAJOR_VERSION+XC_MINOR_VERSION;
+-        int ver_min=100*2+2,ver_max=100*4+2;
++        int ver_min=100*2+2,ver_max=100*4+9;
+         if ( (ver<ver_min) || (ver>ver_max)) {return 1;}
+
+   ;
+diff --git a/src/41_xc_lowlevel/libxc_tools.c b/src/41_xc_lowlevel/libxc_tools.c
+index b08a3d5..c0c1c25 100644
+--- a/src/41_xc_lowlevel/libxc_tools.c
++++ b/src/41_xc_lowlevel/libxc_tools.c
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (C) 2015-2018 ABINIT group (MT)
++ * Copyright (C) 2015-2019 ABINIT group (MT)
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+@@ -24,14 +24,17 @@
+ #endif
+
+ #include <stdlib.h>
++#include <stdio.h>
+
+ #if defined HAVE_LIBXC
+
+ #include "xc.h"
+ #include "xc_version.h"
+-/* if version before 4 get config file*/
++#include "xc_funcs.h"
++
++/* if version before 4 get config file */
+ #if ( XC_MAJOR_VERSION < 4 )
+-#include "xc_config.h"
++#  include "xc_config.h"
+ #else
+ #  define FLOAT double
+ #endif
+@@ -118,8 +121,23 @@ void xc_func_type_free(XC(func_type) **xc_func)
+  *     These accessors where not provided before libXC v3
+  * ===============================================================
+  */
+-#if defined XC_MICRO_VERSION
+- /* libXC v3.0 and later */
++#if ( XC_MAJOR_VERSION > 3 )
++/* ==== libXC v4.0 and later ==== */
++char const *xc_get_info_name(XC(func_type) *xc_func)
++ {return xc_func_info_get_name(xc_func->info);}
++int xc_get_info_flags(XC(func_type) *xc_func)
++ {return xc_func_info_get_flags(xc_func->info);}
++int xc_get_info_kind(XC(func_type) *xc_func)
++ {return xc_func_info_get_kind(xc_func->info);}
++char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
++ {if (*number>=0&&*number<XC_MAX_REFERENCES)
++   {if (xc_func_info_get_references(xc_func->info,*number) != NULL)
++    {return xc_func_info_get_references(xc_func->info,*number)->ref;}}
++  else {return NULL;}
++  return NULL;}
++
++#elif ( XC_MAJOR_VERSION > 2 )
++/* ==== libXC v3.0 ==== */
+ char const *xc_get_info_name(XC(func_type) *xc_func)
+  {return xc_func_info_get_name(xc_func->info);}
+ int xc_get_info_flags(XC(func_type) *xc_func)
+@@ -128,18 +146,13 @@ int xc_get_info_kind(XC(func_type) *xc_func)
+  {return xc_func_info_get_kind(xc_func->info);}
+ char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
+  {if (*number>=0&&*number<=4)
+-#if ( XC_MAJOR_VERSION < 4 )
+    {if (xc_func_info_get_ref(xc_func->info,*number) != NULL)
+     {return xc_func_info_get_ref(xc_func->info,*number);}}
+-#else
+-/* NB: TODO check if return types are used correctly in version 4. Compilation raises warning about return type of xc_func_info_get_references*/
+-   {if (xc_func_info_get_references(xc_func->info,*number) != NULL)
+-    {return xc_func_info_get_references(xc_func->info,*number);}}
+-#endif
+   else {return NULL;}
+   return NULL;}
++
+ #else
+- /* libXC before v3.0 */
++/* ==== Before libXC v3.0 ==== */
+ char const *xc_get_info_name(XC(func_type) *xc_func)
+  {return xc_func->info->name;}
+ int xc_get_info_flags(XC(func_type) *xc_func)
+@@ -151,4 +164,62 @@ char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
+   return NULL;}
+ #endif
+
++/* ===============================================================
++ * Wrapper to xc_func_set_ext_params for backward compatibility
++ *    Allows to change the parameters of a XC functional
++ * ===============================================================
++ */
++void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_params)
++#if ( XC_MAJOR_VERSION > 3 )
++/* ==== libXC v4.0 and later ==== */
++ {/* set_ext_params function is missing for PBE0 */
++  if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
++   {xc_func->cam_alpha=ext_params[0];xc_func->mix_coef[0]=1.0-ext_params[0];}
++
++  else if (n_ext_params == xc_func->info->n_ext_params)
++   {XC(func_set_ext_params)(xc_func, ext_params);}
++
++#else
++/* ==== Before libXC v4.0 ==== */
++ {if (xc_func->info->number == XC_LDA_C_XALPHA && n_ext_params == 1)
++   {XC(lda_c_xalpha_set_params)(xc_func, *ext_params);}
++  else if (xc_func->info->number == XC_MGGA_X_TB09 && n_ext_params == 1)
++   {XC(mgga_x_tb09_set_params)(xc_func, *ext_params);}
++#if ( XC_MAJOR_VERSION > 2 || ( XC_MAJOR_VERSION > 1 && XC_MINOR_VERSION > 0 ) )
++  else if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
++   {XC(hyb_gga_xc_pbeh_set_params)(xc_func, *ext_params);}
++  else if (xc_func->info->number == XC_HYB_GGA_XC_HSE03 && n_ext_params == 3)
++   {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[0], ext_params[2]);
++    xc_func->cam_omega=ext_params[1];}
++  else if (xc_func->info->number == XC_HYB_GGA_XC_HSE06 && n_ext_params == 3)
++   {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[0], ext_params[2]);
++    xc_func->cam_omega=ext_params[1];}
++#else
++  else if (xc_func->info->number == XC_HYB_GGA_XC_HSE03 && n_ext_params == 3)
++   {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[2]);
++    xc_func->cam_omega=ext_params[1];}
++  else if (xc_func->info->number == XC_HYB_GGA_XC_HSE06 && n_ext_params == 3)
++   {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[2]);
++    xc_func->cam_omega=ext_params[1];}
++#endif
++#endif
++  else
++   {fprintf(stderr, "BUG: invalid entry in set_params!\n");abort();}
++ }
++
++/* ===============================================================
++ * Wrapper to xc_func_set_dens_threshold for backward compatibility
++ *    Allows to change the zero-density threshold of a XC functional
++ *    Only available from libXC v4
++ * ===============================================================
++ */
++void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshold)
++#if ( XC_MAJOR_VERSION > 3 )
++/* ==== libXC v4.0 and later ==== */
++   {XC(func_set_dens_threshold)(xc_func, *dens_threshold);}
++#else
++   {fprintf(stderr, "WARNING: setting density threshold not available for libXC<4.0!\n");}
++#endif
++
++
+ #endif
+diff --git a/src/41_xc_lowlevel/m_libxc_functionals.F90 b/src/41_xc_lowlevel/m_libxc_functionals.F90
+index 2ef1954..28b2fa2 100644
+--- a/src/41_xc_lowlevel/m_libxc_functionals.F90
++++ b/src/41_xc_lowlevel/m_libxc_functionals.F90
+@@ -10,7 +10,7 @@
+ !!  Also contains basic container datatype for LibXC interfacing.
+ !!
+ !! COPYRIGHT
+-!! Copyright (C) 2008-2017 ABINIT group (MOliveira,LHH,FL,GMR,MT)
++!! Copyright (C) 2008-2019 ABINIT group (MOliveira,LHH,FL,GMR,MT)
+ !! This file is distributed under the terms of the
+ !! GNU Gener_al Public License, see ~abinit/COPYING
+ !! or http://www.gnu.org/copyleft/gpl.txt .
+@@ -48,9 +48,6 @@
+ #endif
+
+ #include "abi_common.h"
+-#if defined HAVE_LIBXC
+-#include "xc_version.h"
+-#endif
+
+ module libxc_functionals
+
+@@ -58,6 +55,7 @@ module libxc_functionals
+  use m_abicore
+  use m_errors
+
++!ISO C bindings are mandatory
+ #ifdef HAVE_FC_ISO_C_BINDING
+  use iso_c_binding
+ #endif
+@@ -70,6 +68,7 @@ module libxc_functionals
+  public :: libxc_functionals_init               ! Initialize the desired XC functional, from libXC
+  public :: libxc_functionals_end                ! End usage of libXC functional
+  public :: libxc_functionals_fullname           ! Return full name of the XC functional
++ public :: libxc_functionals_getrefs            ! Get references of a XC functional
+  public :: libxc_functionals_getid              ! Return identifer of a XC functional from its name
+  public :: libxc_functionals_family_from_id     ! Retrieve family of a XC functional from its id
+  public :: libxc_functionals_ixc                ! The value of ixc used to initialize the XC functionals
+@@ -86,8 +85,10 @@ module libxc_functionals
+ !Private functions
+  private :: libxc_functionals_constants_load    ! Load libXC constants from C headers
+  private :: libxc_functionals_set_tb09          ! Compute c parameter for Tran-Blaha 2009 functional
++#ifdef HAVE_FC_ISO_C_BINDING
+  private :: xc_char_to_c                        ! Convert a string from Fortran to C
+  private :: xc_char_to_f                        ! Convert a string from C to Fortran
++#endif
+
+ !Public constants (use libxc_functionals_constants_load to init them)
+  integer,public,save :: XC_FAMILY_UNKNOWN       = -1
+@@ -215,40 +216,23 @@ module libxc_functionals
+      type(C_PTR) :: xc_func
+    end subroutine xc_mgga
+  end interface
+-!
+-#if ( XC_MAJOR_VERSION < 4 )
+- interface
+-   subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, alpha) bind(C)
+-     use iso_c_binding, only : C_DOUBLE,C_PTR
+-     real(C_DOUBLE),value :: alpha
+-     type(C_PTR) :: xc_func
+-   end subroutine xc_hyb_gga_xc_pbeh_set_params
+- end interface
+-!
+- interface
+-   subroutine xc_hyb_gga_xc_hse_set_params(xc_func, alpha, omega) bind(C)
+-     use iso_c_binding, only : C_DOUBLE,C_PTR
+-     real(C_DOUBLE),value :: alpha, omega
+-     type(C_PTR) :: xc_func
+-   end subroutine xc_hyb_gga_xc_hse_set_params
+- end interface
+ !
+  interface
+-   subroutine xc_lda_c_xalpha_set_params(xc_func,alpha) bind(C)
+-     use iso_c_binding, only : C_DOUBLE,C_PTR
+-     real(C_DOUBLE),value :: alpha
++   subroutine xc_func_set_params(xc_func,params,n_params) bind(C)
++     use iso_c_binding, only : C_INT,C_DOUBLE,C_PTR
++     integer(C_INT),value :: n_params
++     real(C_DOUBLE) :: params(*)
+      type(C_PTR) :: xc_func
+-   end subroutine xc_lda_c_xalpha_set_params
++   end subroutine xc_func_set_params
+  end interface
+ !
+  interface
+-   subroutine xc_mgga_x_tb09_set_params(xc_func,c) bind(C)
++   subroutine xc_func_set_density_threshold(xc_func,dens_threshold) bind(C)
+      use iso_c_binding, only : C_DOUBLE,C_PTR
+-     real(C_DOUBLE),value :: c
++     real(C_DOUBLE) :: dens_threshold
+      type(C_PTR) :: xc_func
+-   end subroutine xc_mgga_x_tb09_set_params
++   end subroutine xc_func_set_density_threshold
+  end interface
+-#endif
+ !
+  interface
+    subroutine xc_get_singleprecision_constant(xc_cst_singleprecision) bind(C)
+@@ -349,15 +333,6 @@ contains
+
+  subroutine libxc_functionals_constants_load()
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_constants_load'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Local variables-------------------------------
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+  integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8
+@@ -414,15 +389,6 @@ contains
+
+  function libxc_functionals_check(stop_if_error)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_check'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  logical :: libxc_functionals_check
+  logical,intent(in),optional :: stop_if_error
+@@ -434,10 +400,6 @@ contains
+  libxc_functionals_check=.true. ; msg=""
+
+ #if defined HAVE_LIBXC
+-#if defined FC_G95
+- libxc_functionals_check=.false.
+- msg='LibXC cannot be used with G95 Fortran compiler!'
+-#endif
+ #if defined HAVE_FC_ISO_C_BINDING
+  if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
+  if (XC_SINGLE_PRECISION==1) then
+@@ -481,11 +443,11 @@ contains
+ !!
+ !! SIDE EFFECTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+-!!      m_driver,m_drivexc,m_invars2,m_kxc,m_rhotoxc,m_vhxc_me,m_xc_vdw
+-!!      m_xchybrid
++!!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
++!!      xchybrid_ncpp_cc
+ !!
+ !! CHILDREN
+ !!
+@@ -493,15 +455,6 @@ contains
+
+  subroutine libxc_functionals_init(ixc,nspden,xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_init'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  integer, intent(in) :: nspden
+  integer, intent(in) :: ixc
+@@ -512,8 +465,8 @@ contains
+  type(libxc_functional_type),pointer :: xc_func
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+  integer :: flags
+- integer(C_INT) :: func_id_c,iref_c,nspin_c,success_c
+- real(C_DOUBLE) :: alpha_c,beta_c,omega_c
++ integer(C_INT) :: func_id_c,iref_c,npar_c,nspin_c,success_c
++ real(C_DOUBLE) :: alpha_c,beta_c,omega_c,param_c(1)
+  character(kind=C_CHAR,len=1),pointer :: strg_c
+  type(C_PTR) :: func_ptr_c
+ #endif
+@@ -557,7 +510,7 @@ contains
+    xc_func%hyb_mixing_sr=zero
+    xc_func%hyb_range=zero
+
+-   if (xc_func%id==0) cycle
++   if (xc_func%id<=0) cycle
+
+ !  Get XC functional family
+    xc_func%family=libxc_functionals_family_from_id(xc_func%id)
+@@ -589,15 +542,8 @@ contains
+
+ !  Special treatment for LDA_C_XALPHA functional
+    if (xc_func%id==libxc_functionals_getid('XC_LDA_C_XALPHA')) then
+-     alpha_c=real(zero,kind=C_DOUBLE)
+-#if ( XC_MAJOR_VERSION < 4 )
+-     call xc_lda_c_xalpha_set_params(xc_func%conf,alpha_c);
+-#else
+-     msg='seems set_params has disappeared for xalpha in libxc 4. defaults are being used'
+-     MSG_WARNING(msg)
+-     !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+-#endif
+-
++     param_c(1)=real(zero,kind=C_DOUBLE);npar_c=int(1,kind=C_INT)
++     call xc_func_set_params(xc_func%conf,param_c,npar_c)
+    end if
+
+ !  Get functional kind
+@@ -611,7 +557,7 @@ contains
+    xc_func%has_kxc=(iand(flags,XC_FLAGS_HAVE_KXC)>0)
+
+ !  Retrieve parameters for hybrid functionals
+-   if (xc_func%family==XC_FAMILY_HYB_GGA.or.xc_func%family==XC_FAMILY_MGGA) then
++   if (xc_func%family==XC_FAMILY_HYB_GGA.or.xc_func%family==XC_FAMILY_HYB_MGGA) then
+      call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
+      xc_func%hyb_mixing=real(alpha_c,kind=dp)
+      xc_func%hyb_mixing_sr=real(beta_c,kind=dp)
+@@ -659,11 +605,11 @@ end subroutine libxc_functionals_init
+ !!
+ !! SIDE EFFECTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+-!!      m_driver,m_drivexc,m_invars2,m_kxc,m_rhotoxc,m_vhxc_me,m_xc_vdw
+-!!      m_xchybrid
++!!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
++!!      xchybrid_ncpp_cc
+ !!
+ !! CHILDREN
+ !!
+@@ -671,15 +617,6 @@ end subroutine libxc_functionals_init
+
+  subroutine libxc_functionals_end(xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_end'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  type(libxc_functional_type),intent(inout),optional,target :: xc_functionals(2)
+ !Local variables-------------------------------
+@@ -697,7 +634,7 @@ end subroutine libxc_functionals_init
+      xc_func => xc_global(ii)
+    end if
+
+-   if (xc_func%id == 0) cycle
++   if (xc_func%id <= 0) cycle
+    xc_func%id=-1
+    xc_func%family=-1
+    xc_func%kind=-1
+@@ -710,12 +647,12 @@ end subroutine libxc_functionals_init
+    xc_func%hyb_mixing=zero
+    xc_func%hyb_mixing_sr=zero
+    xc_func%hyb_range=zero
+-   if (associated(xc_func%conf)) then
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
++   if (associated(xc_func%conf)) then
+      call xc_func_end(xc_func%conf)
+      call xc_func_type_free(c_loc(xc_func%conf))
+-#endif
+    end if
++#endif
+
+  end do
+
+@@ -733,7 +670,7 @@ end subroutine libxc_functionals_init
+ !!
+ !! INPUTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! OUTPUT
+ !!
+@@ -745,19 +682,11 @@ end subroutine libxc_functionals_init
+
+  function libxc_functionals_fullname(xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_fullname'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  character(len=100) :: libxc_functionals_fullname
+  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+ !Local variables-------------------------------
++ integer :: nxc
+  type(libxc_functional_type),pointer :: xc_funcs(:)
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+  character(len=100) :: xcname
+@@ -774,13 +703,21 @@ end subroutine libxc_functionals_init
+    xc_funcs => xc_global
+  end if
+
++ nxc=size(xc_funcs)
++ if (nxc<1) return
++
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+- if (xc_funcs(1)%id == 0) then
++ if (nxc<2) then
++   if (xc_funcs(1)%id /= 0) then
++     call c_f_pointer(xc_functional_get_name(xc_funcs(1)%id),strg_c)
++     call xc_char_to_f(strg_c,libxc_functionals_fullname)
++   end if
++ else if (xc_funcs(1)%id <= 0) then
+    if (xc_funcs(2)%id /= 0) then
+      call c_f_pointer(xc_functional_get_name(xc_funcs(2)%id),strg_c)
+      call xc_char_to_f(strg_c,libxc_functionals_fullname)
+    end if
+- else if (xc_funcs(2)%id == 0) then
++ else if (xc_funcs(2)%id <= 0) then
+    if (xc_funcs(1)%id /= 0) then
+      call c_f_pointer(xc_functional_get_name(xc_funcs(1)%id),strg_c)
+      call xc_char_to_f(strg_c,libxc_functionals_fullname)
+@@ -795,7 +732,57 @@ end subroutine libxc_functionals_init
+  libxc_functionals_fullname=trim(libxc_functionals_fullname)
+ #endif
+
+-end function libxc_functionals_fullname
++ end function libxc_functionals_fullname
++!!***
++
++!----------------------------------------------------------------------
++
++!!****f* libxc_functionals/libxc_functionals_getrefs
++!! NAME
++!!  libxc_functionals_getrefs
++!!
++!! FUNCTION
++!!  Return the reference(s) of a XC functional
++!!
++!! INPUTS
++!! xc_functional=<type(libxc_functional_type)>, handle for XC functional
++!!
++!! OUTPUT
++!! xcrefs(:)= references(s) of the functional
++!!
++!! SOURCE
++
++subroutine libxc_functionals_getrefs(xcrefs,xc_functional)
++
++!Arguments ------------------------------------
++ character(len=*),intent(out) :: xcrefs(:)
++ type(libxc_functional_type),intent(in) :: xc_functional
++!Local variables-------------------------------
++#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
++ integer(C_INT) :: iref_c
++ character(kind=C_CHAR,len=1),pointer :: strg_c
++#endif
++
++! *************************************************************************
++
++ xcrefs(:)=''
++
++#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
++ iref_c=0
++ do while (iref_c>=0.and.iref_c<size(xcrefs))
++   call c_f_pointer(xc_get_info_refs(xc_functional%conf,iref_c),strg_c)
++   if (associated(strg_c)) then
++     call xc_char_to_f(strg_c,xcrefs(iref_c+1))
++     iref_c=iref_c+1
++   else
++     iref_c=-1
++   end if
++ end do
++#else
++ if (.False.) write(std_out,*) xc_functional%id
++#endif
++
++end subroutine libxc_functionals_getrefs
+ !!***
+
+ !----------------------------------------------------------------------
+@@ -818,15 +805,6 @@ end function libxc_functionals_fullname
+
+  function libxc_functionals_family_from_id(xcid)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_family_from_id'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  integer :: libxc_functionals_family_from_id
+  integer,intent(in) :: xcid
+@@ -869,15 +847,6 @@ end function libxc_functionals_family_from_id
+
+  function libxc_functionals_getid(xcname)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_getid'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  integer :: libxc_functionals_getid
+  character(len=*),intent(in) :: xcname
+@@ -920,7 +889,7 @@ end function libxc_functionals_getid
+ !!
+ !! INPUTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+ !!
+@@ -930,15 +899,6 @@ end function libxc_functionals_getid
+
+  function libxc_functionals_ixc(xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_ixc'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  integer :: libxc_functionals_ixc
+  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+@@ -966,7 +926,7 @@ end function libxc_functionals_ixc
+ !!
+ !! INPUTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+ !!
+@@ -976,15 +936,6 @@ end function libxc_functionals_ixc
+
+  function libxc_functionals_isgga(xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_isgga'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  logical :: libxc_functionals_isgga
+  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+@@ -1017,7 +968,7 @@ end function libxc_functionals_isgga
+ !!
+ !! INPUTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+ !!
+@@ -1027,15 +978,6 @@ end function libxc_functionals_isgga
+
+ function libxc_functionals_ismgga(xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_ismgga'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  logical :: libxc_functionals_ismgga
+  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+@@ -1072,7 +1014,7 @@ end function libxc_functionals_ismgga
+ !!
+ !! INPUTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+ !!
+@@ -1082,15 +1024,6 @@ end function libxc_functionals_ismgga
+
+  function libxc_functionals_is_hybrid(xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_is_hybrid'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  logical :: libxc_functionals_is_hybrid
+  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+@@ -1123,7 +1056,7 @@ end function libxc_functionals_is_hybrid
+ !!
+ !! INPUTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+ !!
+@@ -1133,15 +1066,6 @@ end function libxc_functionals_is_hybrid
+
+ function libxc_functionals_has_kxc(xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_has_kxc'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  logical :: libxc_functionals_has_kxc
+  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+@@ -1174,7 +1098,7 @@ end function libxc_functionals_has_kxc
+ !!
+ !! INPUTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+ !!
+@@ -1184,15 +1108,6 @@ end function libxc_functionals_has_kxc
+
+ function libxc_functionals_nspin(xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_nspin'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  integer :: libxc_functionals_nspin
+  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+@@ -1244,10 +1159,10 @@ end function libxc_functionals_nspin
+ !!
+ !! SIDE EFFECTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+-!!      m_drivexc,m_pawxc,m_xc_vdw
++!!      drivexc,m_pawxc,m_xc_vdw
+ !!
+ !! CHILDREN
+ !!
+@@ -1256,15 +1171,6 @@ end function libxc_functionals_nspin
+  subroutine libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho,exc,vxc,&
+ &           grho2,vxcgr,lrho,vxclrho,tau,vxctau,dvxc,d2vxc,xc_tb09_c,xc_functionals) ! Optional arguments
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_getvxc'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  integer, intent(in) :: ndvxc,nd2vxc,npts,nspden,order
+  real(dp),intent(in)  :: rho(npts,nspden)
+@@ -1284,11 +1190,13 @@ end function libxc_functionals_nspin
+  integer  :: ii,ipts
+  logical :: is_gga,is_mgga
+  real(dp) :: xc_tb09_c_
++ real(dp),target :: exctmp
++ character(len=500) :: msg
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
+ #endif
+ !arrays
+- real(dp),target :: rhotmp(nspden),sigma(3),exctmp,vxctmp(nspden),vsigma(3)
++ real(dp),target :: rhotmp(nspden),sigma(3),vxctmp(nspden),vsigma(3)
+  real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6),v3rho3(4)
+  real(dp),target :: lrhotmp(nspden),tautmp(nspden),vlrho(nspden),vtau(nspden)
+  type(libxc_functional_type),pointer :: xc_funcs(:)
+@@ -1312,6 +1220,15 @@ end function libxc_functionals_nspin
+  is_gga =libxc_functionals_isgga (xc_funcs)
+  is_mgga=libxc_functionals_ismgga(xc_funcs)
+
++ if (is_gga.and.(.not.present(grho2))) then
++   msg='GGA needs gradient of density!'
++   MSG_BUG(msg)
++ end if
++ if (is_mgga.and.((.not.present(lrho)).or.(.not.present(tau)))) then
++   msg='meta-GGA needs laplacian of density or tau!'
++   MSG_BUG(msg)
++ endif
++
+ !Inititalize all output arrays to zero
+  exc=zero ; vxc=zero
+  if (present(dvxc)) dvxc=zero
+@@ -1410,7 +1327,7 @@ end function libxc_functionals_nspin
+
+ !  Loop over functionals
+    do ii = 1,2
+-     if (xc_funcs(ii)%id==0) cycle
++     if (xc_funcs(ii)%id<=0) cycle
+
+ !    Get the potential (and possibly the energy)
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+@@ -1513,7 +1430,7 @@ end function libxc_functionals_nspin
+      end if
+
+ !    Convert the quantities returned by Libxc to the ones needed by ABINIT
+-     if (is_gga.or.is_mgga) then
++     if ((is_gga.or.is_mgga).and.present(vxcgr)) then
+        if (nspden==1) then
+          vxcgr(ipts,3) = vxcgr(ipts,3) + vsigma(1)*two
+        else
+@@ -1522,8 +1439,10 @@ end function libxc_functionals_nspin
+          vxcgr(ipts,3) = vxcgr(ipts,3) + vsigma(2)
+        end if
+      end if
+-     if (is_mgga) then
++     if (is_mgga.and.present(vxclrho)) then
+        vxclrho(ipts,1:nspden) = vxclrho(ipts,1:nspden) + vlrho(1:nspden)
++     end if
++     if (is_mgga.and.present(vxctau)) then
+        vxctau(ipts,1:nspden)  = vxctau(ipts,1:nspden)  + vtau(1:nspden)
+      end if
+
+@@ -1544,7 +1463,7 @@ end subroutine libxc_functionals_getvxc
+ !!
+ !! INPUTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! OUTPUT
+ !!  [hyb_mixing]  = mixing factor of Fock contribution
+@@ -1552,7 +1471,7 @@ end subroutine libxc_functionals_getvxc
+ !!  [hyb_range]    = Range (for separation)
+ !!
+ !! PARENTS
+-!!      m_invars2,m_rhotoxc
++!!      invars2,rhotoxc
+ !!
+ !! CHILDREN
+ !!
+@@ -1560,15 +1479,6 @@ end subroutine libxc_functionals_getvxc
+
+ subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_get_hybridparams'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  real(dp),intent(out),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
+  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+@@ -1647,12 +1557,12 @@ end subroutine libxc_functionals_get_hybridparams
+ !! [hyb_mixing_sr]    = mixing factor of short-range Fock contribution
+ !! [hyb_range]        = Range (for separation)
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! OUTPUT
+ !!
+ !! PARENTS
+-!!      m_fock,m_vhxc_me
++!!      calc_vhxc_me,m_fock
+ !!
+ !! CHILDREN
+ !!
+@@ -1660,15 +1570,6 @@ end subroutine libxc_functionals_get_hybridparams
+
+ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_set_hybridparams'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr,hyb_range
+  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+@@ -1677,10 +1578,11 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
+  logical :: is_pbe0,is_hse
+  integer :: func_id(2)
+  character(len=500) :: msg
++ type(libxc_functional_type),pointer :: xc_func
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+- real(C_DOUBLE) :: alpha_c,beta_c,omega_c
++ integer(C_INT) :: npar_c
++ real(C_DOUBLE) :: alpha_c,beta_c,omega_c,param_c(3)
+ #endif
+- type(libxc_functional_type),pointer :: xc_func
+
+ ! *************************************************************************
+
+@@ -1716,31 +1618,22 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
+    if (present(hyb_mixing))then
+      xc_func%hyb_mixing=hyb_mixing
+      alpha_c=real(xc_func%hyb_mixing,kind=C_DOUBLE)
+-     if(is_pbe0)then
+-#if ( XC_MAJOR_VERSION < 4 )
+-       call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf,alpha_c)
+-#else
+-       msg='seems set_params has disappeared for pbeh in libxc 4. defaults are being used'
+-       MSG_WARNING(msg)
+-       !call xc_hyb_gga_xc_pbeh_init(xc_func%conf)
+-#endif
++     if (is_pbe0) then
++       npar_c=int(1,kind=C_INT) ; param_c(1)=alpha_c
++       call xc_func_set_params(xc_func%conf,param_c,npar_c)
+      endif
+    endif
+
+ !  HSE type functionals
+-   if(present(hyb_mixing_sr).or.present(hyb_range))then
+-     if(present(hyb_mixing_sr))xc_func%hyb_mixing_sr=hyb_mixing_sr
+-     if(present(hyb_range))xc_func%hyb_range=hyb_range
+-     beta_c=real(xc_func%hyb_mixing_sr,kind=C_DOUBLE)
++   if(present(hyb_mixing_sr).or.present(hyb_range)) then
++     if (present(hyb_mixing_sr)) xc_func%hyb_mixing_sr=hyb_mixing_sr
++     if (present(hyb_range))     xc_func%hyb_range=hyb_range
++     beta_c =real(xc_func%hyb_mixing_sr,kind=C_DOUBLE)
+      omega_c=real(xc_func%hyb_range,kind=C_DOUBLE)
+-     if(is_hse)then
+-#if ( XC_MAJOR_VERSION < 4 )
+-       call xc_hyb_gga_xc_hse_set_params(xc_func%conf,beta_c,omega_c)
+-#else
+-       msg='seems set_params has disappeared for hse in libxc 4. defaults are being used'
+-       MSG_WARNING(msg)
+-     !call hyb_gga_xc_hse_init(xc_func%conf)
+-#endif
++     if (is_hse) then
++       npar_c=int(3,kind=C_INT)
++       param_c(1)=beta_c;param_c(2:3)=omega_c
++       call xc_func_set_params(xc_func%conf,param_c,npar_c)
+      endif
+    end if
+
+@@ -1791,15 +1684,6 @@ end subroutine libxc_functionals_set_hybridparams
+
+ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_gga_from_hybrid'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+ !scalars
+  integer,intent(in),optional :: hybrid_id
+@@ -1836,7 +1720,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
+  c_name="unknown" ; x_name="unknown"
+
+ !Specific treatment of the B3LYP functional, whose GGA counterpart does not exist in LibXC
+- if(trial_id(1)==402 .or. trial_id(2)==402)then
++ if (trial_id(1)==402 .or. trial_id(2)==402) then
+    libxc_functionals_gga_from_hybrid=.true.
+    if (present(gga_id)) then
+      gga_id(1)=0
+@@ -1849,7 +1733,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
+
+  do ii = 1, 2
+
+-   if (trial_id(ii)==0) cycle
++   if (trial_id(ii)<=0) cycle
+    family=libxc_functionals_family_from_id(trial_id(ii))
+    if (family/=XC_FAMILY_HYB_GGA.and.family/=XC_FAMILY_HYB_MGGA) cycle
+
+@@ -1920,7 +1804,7 @@ end function libxc_functionals_gga_from_hybrid
+ !!
+ !! SIDE EFFECTS
+ !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+-!!                     XC functionals to initialize
++!!                     Handle for XC functionals
+ !!
+ !! PARENTS
+ !!      m_libxc_functionals
+@@ -1931,15 +1815,6 @@ end function libxc_functionals_gga_from_hybrid
+
+  subroutine libxc_functionals_set_tb09(npts,nspden,rho,grho2,xc_tb09_c,xc_functionals)
+
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'libxc_functionals_set_tb09'
+-!End of the abilint section
+-
+- implicit none
+-
+ !Arguments ------------------------------------
+  integer, intent(in) :: npts,nspden
+  real(dp),intent(in)  :: rho(npts,nspden),grho2(npts,2*min(nspden,2)-1)
+@@ -1954,6 +1829,10 @@ end function libxc_functionals_gga_from_hybrid
+ !arrays
+  type(libxc_functional_type),pointer :: xc_funcs(:)
+  real(dp),allocatable :: gnon(:)
++#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
++ integer(C_INT) :: npar_c=int(1,kind=C_INT)
++ real(C_DOUBLE) :: param_c(1)
++#endif
+
+ ! *************************************************************************
+
+@@ -2001,13 +1880,8 @@ end function libxc_functionals_gga_from_hybrid
+    do ii=1,2
+      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+-#if ( XC_MAJOR_VERSION < 4 )
+-       call xc_mgga_x_tb09_set_params(xc_funcs(ii)%conf,cc)
+-#else
+-       msg='seems set_params has disappeared for tb09 in libxc 4. defaults are being used'
+-       MSG_WARNING(msg)
+-       !call xc_hyb_gga_xc_tb09_init(xc_func%conf)
+-#endif
++       param_c(1)=real(cc,kind=C_DOUBLE)
++       call xc_func_set_params(xc_funcs(ii)%conf,param_c,npar_c)
+ #endif
+      end if
+    end do
+@@ -2036,25 +1910,21 @@ end subroutine libxc_functionals_set_tb09
+
+ #if defined HAVE_FC_ISO_C_BINDING
+ function xc_char_to_c(f_string) result(c_string)
+-!Arguments ------------------------------------
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'xc_char_to_c'
+-!End of the abilint section
+
++!Arguments ------------------------------------
+  character(len=*),intent(in) :: f_string
+  character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
+ !Local variables -------------------------------
+  integer :: ii,strlen
++
+ !! *************************************************************************
++
+  strlen=len_trim(f_string)
+  forall(ii=1:strlen)
+    c_string(ii)=f_string(ii:ii)
+  end forall
+  c_string(strlen+1)=C_NULL_CHAR
+- end function xc_char_to_c
++end function xc_char_to_c
+ #endif
+ !!***
+
+@@ -2083,25 +1953,21 @@ function xc_char_to_c(f_string) result(c_string)
+
+ #if defined HAVE_FC_ISO_C_BINDING
+ subroutine xc_char_to_f(c_string,f_string)
+-!Arguments ------------------------------------
+-
+-!This section has been created automatically by the script Abilint (TD).
+-!Do not modify the following lines by hand.
+-#undef ABI_FUNC
+-#define ABI_FUNC 'xc_char_to_f'
+-!End of the abilint section
+
++!Arguments ------------------------------------
+  character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
+  character(len=*),intent(out) :: f_string
+ !Local variables -------------------------------
+  integer :: ii
++
+ !! *************************************************************************
++
+  ii=1
+  do while(c_string(ii)/=C_NULL_CHAR.and.ii<=len(f_string))
+    f_string(ii:ii)=c_string(ii) ; ii=ii+1
+  end do
+  if (ii<len(f_string)) f_string(ii:)=' '
+- end subroutine xc_char_to_f
++end subroutine xc_char_to_f
+ #endif
+ !!***
