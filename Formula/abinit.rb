@@ -31,7 +31,7 @@ class Abinit < Formula
 # From libxc3 to libXC4
   patch do
     url "https://github.com/abinit/homebrew-tap/raw/master/Formula/libxc_3to4_patch.diff"
-    sha256 "ede1f6b5ab75c94fe29084443d245f1d934d896d0ac64825ef3a15214f83a7f9"
+    sha256 "257a493f6ab3079886631a488f52f2d4d1e0559c6553456bd21c0c3070311b41"
   end
 
   def install

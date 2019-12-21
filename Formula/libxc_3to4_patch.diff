@@ -72,7 +72,7 @@ index b08a3d5..c0c1c25 100644
   {return xc_func_info_get_kind(xc_func->info);}
  char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
   {if (*number>=0&&*number<=4)
--#if ( XC_MAJOR_VERSION < 4 )
+-#if ( XC_MAJOR_VERSION < 4 ) 
     {if (xc_func_info_get_ref(xc_func->info,*number) != NULL)
      {return xc_func_info_get_ref(xc_func->info,*number);}}
 -#else
