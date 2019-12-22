@@ -3,30 +3,30 @@ class Abinit < Formula
   homepage "https://www.abinit.org/"
   url "https://www.abinit.org/sites/default/files/packages/abinit-8.10.3.tar.gz"
   sha256 "ed626424b4472b93256622fbb9c7645fa3ffb693d4b444b07d488771ea7eaa75"
+  revision 1
   # tag "chemistry"
   # doi "10.1016/j.cpc.2016.04.003"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
     cellar :any
-    sha256 "0b02d4ff91cb2b4672d1acf5f708f899bcd1e036a873f3685280b92e7f18c4e0" => :mojave
+    sha256 "e02436dfb7d126c69a52ba32e2f574c150602b2c8134993fe2bd1b42d56d7f05" => :mojave
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
-  option "without-test", "Skip build-time tests (not recommended)"
-  option "with-testsuite", "Run full test suite (time consuming)"
+  option "without-test", "Skip build-time quick tests (not recommended)"
+  option "with-testsuite", "Install script to run full test suite (see: brew test abinit)"
 
   depends_on "gcc" if OS.mac? # for gfortran
+  depends_on "gcc" if build.with? "openmp"
   depends_on "open-mpi"
   depends_on "fftw" => :recommended
-  depends_on "netcdf" => :recommended
   depends_on "libxc" => :recommended
+  depends_on "netcdf" => :recommended
   if OS.mac?
     depends_on "veclibfort"
     depends_on "scalapack" => :recommended
   end
-
-  needs :openmp if build.with? "openmp"
 
 # From libxc3 to libXC4
   patch do
@@ -98,21 +98,64 @@ class Abinit < Formula
     system "make"
 
     if build.with? "test"
-      cd "tests"
-      if build.with? "testsuite"
-        system "./runtests.py 2>&1 | tee make-check.log"
-      else
-        system "./runtests.py built-in fast 2>&1 | tee make-check.log"
-      end
+      #Execute quick tests
+      system "./tests/runtests.py built-in fast 2>&1 | tee make-check.log"
       ohai `grep ", succeeded:" "make-check.log"`.chomp
       prefix.install "make-check.log"
-      cd ".."
+    elsif build.with? "testsuite"
+      #Generate test database only
+      system "./tests/runtests.py 2>&1 fast[00] >/dev/null"
     end
 
     system "make", "install"
+
+    if build.with? "testsuite"
+      #Create a wrapper to runtests.py script
+      test_path = share/"abinit-test"
+      test_file = File.new("abinit-runtests", "w")
+      test_file.puts "#!/bin/sh"
+      revision == 0 ? ver = "#{version}" : ver = "#{version}_#{revision}"
+      test_file.puts "SHAREDIR=\`brew --cellar\`\"/#{name}/#{ver}/share\""
+      test_file.puts "TESTDIR=${SHAREDIR}\"/abinit-test\""
+      test_file.puts "if [ -w \"${TESTDIR}/test_suite.cpkl\" ];then"
+      test_file.puts " PYTHONPATH=${SHAREDIR}\":\"${PYTHONPATH} ${TESTDIR}\"/runtests.py\" -b\"${TESTDIR}\" $@"
+      test_file.puts "else"
+      test_file.puts " echo \"You dont have write access to \"${TESTDIR}\"! use sudo?\""
+      test_file.puts "fi"
+      test_file.close
+      bin.install "abinit-runtests"
+      #Copy some needed files
+      test_dir = Pathname.new("#{test_path}")
+      test_dir.install "config.h"
+      test_dir.install "tests/test_suite.cpkl"
+      Pathname.new("#{test_path}/runtests.py").chmod 0555
+      #Create symlinks to have a fake test environment
+      cd share
+      ln_s "abinit-test", "tests", force: true
+      mkdir_p "#{test_path}/src"
+      cd "#{test_path}/src"
+      ln_s bin.relative_path_from("#{test_path}/src"), "98_main", force: true
+      cd buildpath
+    end
+
   end
 
   test do
     system "#{bin}/abinit", "-b"
+    if build.with? "testsuite"
+      system "#{bin}/abinit-runtests", "--help"
+      puts
+      puts "The entire ABINIT test suite is available"
+      puts "thanks to the 'abinit-runtests' script."
+      puts "Type 'abinit-runtests --help' to learn more."
+      puts "Note that you need write access to #{share}/abinit-test"
+      puts "and that some libXC tests (based on libXC v3) will failed." 
+    else
+      puts
+      puts "ABINIT test suite is not available because it"
+      puts "has not been activated at the installation stage."
+      puts "Action: install with 'brew install abinit --with-testsuite'."
+    end
   end
+
 end
