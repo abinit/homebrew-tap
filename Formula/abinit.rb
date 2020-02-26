@@ -10,9 +10,9 @@ class Abinit < Formula
   bottle do
     root_url "http://forge.abinit.org/homebrew"
     cellar :any
-    sha256 "becbe0d191d85a0b224bac157a5e389d6226221ed30874b313b06108028c0f23" => :catalina
-    sha256 "e02436dfb7d126c69a52ba32e2f574c150602b2c8134993fe2bd1b42d56d7f05" => :mojave
-    sha256 "489f9ee85e6db11d23c14b2a20e776bd48bc93af3462b976b8f6a38849d91e7b" => :high_sierra
+    sha256 "a8c47de834f004373686f444052464d6cfd857f73e2537fac9ce132f41cc26ac" => :catalina
+    sha256 "0fd0fb8fa3bfd3c430cc0d93f3d096ce4bf12aeb379d428cbb24b5bb5daca8a3" => :mojave
+    sha256 "fbfbcd2053d2f8632e19f48bb5f9093c3d058434e5f8d2a4057fa1435d02c33e" => :high_sierra
 end
 
   option "without-openmp", "Disable OpenMP multithreading"
