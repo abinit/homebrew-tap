@@ -36,6 +36,9 @@ end
     sha256 "257a493f6ab3079886631a488f52f2d4d1e0559c6553456bd21c0c3070311b41"
   end
 
+# Multibinit 8.10.3 needs to be patched with gcc9.3
+  patch :DATA
+
   def install
 
     ENV.delete "CC"
@@ -161,3 +164,64 @@ end
   end
 
 end
+
+__END__
+diff --git a/src/78_effpot/m_polynomial_coeff.F90 b/src/78_effpot/m_polynomial_coeff.F90
+index 2eb330b..f5aade1 100644
+--- a/src/78_effpot/m_polynomial_coeff.F90
++++ b/src/78_effpot/m_polynomial_coeff.F90
+@@ -2502,8 +2502,8 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
+ 
+ !Arguments ---------------------------------------------
+ !scalar
+- integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max,ncoeff_out,nsym,nrpt,nstr
+- integer,intent(inout) :: icoeff,icoeff_tot
++ integer,intent(in) :: icoeff,natom,ncoeff,power_disp,power_disp_min,power_disp_max,ncoeff_out,nsym,nrpt,nstr
++ integer,intent(inout) :: icoeff_tot
+  logical,optional,intent(in) :: compute,anharmstr,spcoupling,distributed
+  integer,optional,intent(in) :: nbody
+ !arrays
+@@ -2554,7 +2554,9 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
+ !    If the distance between the 2 coefficients is superior than the cut-off,
+ !    we cycle
+ !    If the power_disp is one, we need to set icoeff to icoeff1
+-     if(power_disp==1) icoeff = icoeff1
++     if(power_disp==1) then
++       if(icoeff1 <= ncoeff .and. compatibleCoeffs(icoeff1,icoeff1)==0) cycle
++     end if
+ 
+      if(compatibleCoeffs(icoeff,icoeff1)==0) cycle
+
+@@ -2757,9 +2757,9 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
+ 
+ !Arguments ---------------------------------------------
+ !scalar
+- integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max
++ integer,intent(in) :: icoeff,natom,ncoeff,power_disp,power_disp_min,power_disp_max
+  integer,intent(in) :: max_power_strain,nmodel,nsym,nrpt,nstr
+- integer,intent(inout) :: icoeff,nmodel_tot
++ integer,intent(inout) :: nmodel_tot
+  logical,optional,intent(in) :: compute,anharmstr,spcoupling
+  integer,optional,intent(in) :: nbody
+  logical,optional,intent(in) :: only_odd_power,only_even_power
+@@ -2807,16 +2807,15 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
+ 
+ !    If the power_disp is one, we need to set icoeff to icoeff1
+      if(power_disp==1) then
+-       icoeff = icoeff1
+-       if(compatibleCoeffs(icoeff,icoeff1)==0)then
++       if(icoeff1<=ncoeff .and. compatibleCoeffs(icoeff,icoeff1)==0)then
+          compatible = .FALSE.
+        end if
+      end if
+ !    If the distance between the 2 coefficients is superior than the cut-off, we cycle.
+     do icoeff2=1,power_disp-1
+-      if(compatibleCoeffs(index_coeff(icoeff2),icoeff1)==0)then
+-        compatible = .FALSE.
+-      end if
++      if(icoeff1 <= ncoeff .and. index_coeff(icoeff2) <=ncoeff)then
++        if(compatibleCoeffs(index_coeff(icoeff2),icoeff1)==0) compatible=.FALSE.
++      endif
+     end do
+ 
+      if (.not.compatible) cycle !The distance is not compatible
