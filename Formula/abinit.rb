@@ -1,17 +1,17 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz"
-  sha256 "7aedf5ec2108acf36d097dfc3025e9ef5416623a0accc482495ec4776c707b29"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-9.2.1.tar.gz"
+  sha256 "4aa2deaeec385ff1624669a59768e1a6655f6367f8f109e69944244e000142a0"
   # tag "chemistry"
   # doi "10.1016/j.cpc.2019.107042"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
     cellar :any
-    sha256 "88015de13c7d4dea972af98027886b544a87e6dcca1a071e7a6b075fb74968fc" => :catalina
-    sha256 "d6f9aae039ac8c9c4ac1b9fa33b43643dad2db37a1b9913e58325daf070e401e" => :mojave
-    sha256 "17434778ab928ae89e139413b9f2cbd41f12892395c9026042e5943652786224" => :high_sierra
+    sha256 "9bda3b7a9baade69a29e89266d02ddfcc2dacd9f9c68c4f2f9c2499224df3145" => :catalina
+    sha256 "c9ca889b973509ab57f8933a6438b57166bef4edd6433d8153778766b86c2bef" => :mojave
+    sha256 "74f1c6f74a80030de2366355cc29ef265143bd4aac7a43fead2b0f2405e2f3e5" => :high_sierra
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
