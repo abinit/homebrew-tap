@@ -1,5 +1,5 @@
 class Agate < Formula
-  desc "A graphical analysis tool engine for DFT calculations"
+  desc "Agate is a Graphical Analysis Tool Engine for DFT calculations"
   homepage "https://github.com/piti-diablotin/agate"
   url "https://github.com/piti-diablotin/agate/releases/download/v1.1.1/agate-1.1.1.tar.gz"
   sha256 "ed6706eb1196b69d882a41d02a7683fa33f33f39faf9f81d70db812b31db1321"
@@ -14,6 +14,7 @@ class Agate < Formula
   depends_on "freetype" => :build
   depends_on "glfw" => :build
   depends_on "gnuplot" => :build
+  depends_on "jpeg" => :build
   depends_on "libpng" => :build
   depends_on "libssh" => :build
   depends_on "libtool" => :build
@@ -28,6 +29,7 @@ class Agate < Formula
                           "--disable-dependency-tracking",
                           "--disable-silent-rules",
                           "--prefix=#{prefix}"
+    system "make"
     system "make check"
     system "make install"
   end
