@@ -8,6 +8,7 @@ class Wannier90 < Formula
   bottle do
     root_url "http://forge.abinit.org/homebrew"
     cellar :any
+    sha256 "57cb79b91f67977ac68e2cb2826118f7e11ba49e61793096668e89adfff70266" => :big_sur
     sha256 "dd048b79f858881d95e562c641941922977e82350f8fd465a93d5228158a6b73" => :catalina
     sha256 "422c90304167b01b41f28f49023f873f820fb954d116cdbd52b18153cc104092" => :mojave
     sha256 "0597673252b1205daf986905f26e7c6186f43062a5c5d6ae3539e21d5b662421" => :high_sierra
