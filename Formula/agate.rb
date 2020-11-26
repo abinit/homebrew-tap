@@ -1,8 +1,8 @@
 class Agate < Formula
   desc "Agate is a Graphical Analysis Tool Engine for DFT calculations"
   homepage "https://github.com/piti-diablotin/agate"
-  url "https://github.com/piti-diablotin/agate/releases/download/v1.1.1/agate-1.1.1.tar.gz"
-  sha256 "ed6706eb1196b69d882a41d02a7683fa33f33f39faf9f81d70db812b31db1321"
+  url "https://github.com/piti-diablotin/agate/releases/download/v1.1.2/agate-1.1.2.tar.gz"
+  sha256 "87ef3d24c862648989e44c1564a9aed8e2e8a2cb81cc69d3c38c1752d0391277"
   license "GPL-3.0"
 
   depends_on "automake" => :build
