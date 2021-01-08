@@ -22,7 +22,6 @@ class Agate < Formula
   depends_on "netcdf" => :build
   depends_on "yaml-cpp" => :build
   depends_on "readline" => :build
-  depends_on "with-readline" => :build
 
   def install
     # Remove unrecognized options if warned by configure
