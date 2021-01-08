@@ -13,7 +13,7 @@ class Agate < Formula
   depends_on "fftw" => :build
   depends_on "freetype" => :build
   depends_on "glfw" => :build
-  depends_on "gnuplot" => :build
+  depends_on "gnuplot" => :recommended
   depends_on "jpeg" => :build
   depends_on "libpng" => :build
   depends_on "libssh" => :build
