@@ -35,7 +35,7 @@ New installs will then use this bottle.
 
 # Post-processing tool
 
-This tap also contains `agate` and its Qt interface `qAgate`.
+This tap also contains [agate](https://github.com/piti-diablotin/agate) and its Qt interface [qAgate](https://github.com/piti-diablotin/qAgate).
 You can install `agate` with
 
 ```
