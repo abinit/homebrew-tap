@@ -1,11 +1,11 @@
 class Qagate < Formula
   desc "Qt interface for agate"
-  homepage ""
-  url "https://github.com/piti-diablotin/qAgate/releases/download/v1.1.1/qAgate1.1.1.tar.gz"
-  sha256 "4dfe6ed4ac008284b918ced6dcdb29db35a641069a6d3bc41b09917fe196eea7"
-  license ""
+  homepage "https://github.com/piti-diablotin/qAgate"
+  url "https://github.com/piti-diablotin/qAgate/releases/download/v1.2.0/qAgate1.2.0.tar.gz"
+  sha256 "b0d31e68c0b68b23d10cd694eef4206d4a778a187ca9b05cc2bead6868efcf19"
+  license "GPL-3.0"
 
-  depends_on "agate" => :build
+  depends_on "agate" => [:build, 'without-gnuplot']
   depends_on "freetype" => :build
   depends_on "libssh" => :build
   depends_on "qt" => :build

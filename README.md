@@ -32,3 +32,24 @@ Homebrew formulae can include compiled binaries, which it calls "bottles". To bu
 1. Update the `abinit` formula with the bottle SHA and tag, in the bottle section with the custom URL.
 
 New installs will then use this bottle.
+
+# Post-processing tool
+
+This tap also contains [agate](https://github.com/piti-diablotin/agate) and its Qt interface [qAgate](https://github.com/piti-diablotin/qAgate).
+You can install `agate` with
+
+```
+brew install agate # with gnuplot support
+# or
+brew install agate --without-gnuplot # without gnuplot support
+```
+
+*You can still install gnuplot later if you wish.*
+
+Independently, you can install qAgate with
+```
+brew install --cask qagate # Recommanded  precompiled version
+#or
+brew install qagate # Formulae that compiles qAgate
+```
+
