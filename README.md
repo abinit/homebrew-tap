@@ -53,3 +53,10 @@ brew install --cask qagate # Recommanded  precompiled version
 brew install qagate # Formulae that compiles qAgate
 ```
 
+In the case of the `Formulae`, the `.app` will be place in `/usr/local/Cellar/qagate/X.X.X/bin`
+You can then make a symlink to `/Applications/` if you want.
+
+For instance for version 1.1.1 `ln -s /usr/local/Cellar/qagate/1.1.1/bin/qAgate.app /Applications/`.
+The app will then appear in the launcher.
+
+In the case of the `cask` nothing has to be done. The app will be in the launcher.
