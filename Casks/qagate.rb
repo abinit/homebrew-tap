@@ -1,8 +1,8 @@
 cask "qagate" do
-  version "1.2.1"
-  sha256 "d4c8a4ab2c0dbc38aca80f6f2426e2c5c92513c31c7b5c8286042910b53a2e64"
+  version "1.2.2"
+  sha256 "cffc2693f711558bd21aa8b65d89811511ffde0c246ead7c5c7fc39a500ad74e"
 
-  url "https://github.com/piti-diablotin/qAgate/releases/download/v1.2.1/qAgate-1.2.1.dmg"
+  url "https://github.com/piti-diablotin/qAgate/releases/download/v1.2.2/qAgate-1.2.2.dmg"
   name "qAgate"
   desc "Qt interface for agate"
   homepage "https://github.com/piti-diablotin/qAgate"
