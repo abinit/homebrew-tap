@@ -13,12 +13,13 @@ brew install abinit
 
 *Notes:*  
 *Always use the latest Homebrew version (use* `brew upgrade`*).*  
+*We do not currently provide a bottle for Mac Silicon. If you generate one, you can send it to us.*  
 `abinit v8` *is still accessible via* `brew install abinit8`*.*
 
 > If you experience difficulties with precompiled bottles (following an update of homebrew, for example), you can force the re-compilation of abinit:
-> ```brew install --build-from-source abinit```  
-> If you experience an error like `curl: (60) SSL certificate problem`, try this:  
-> ```HOMEBREW_FORCE_BREWED_CURL=1 brew install abinit```  
+> ```brew install --build-from-source abinit```
+> If you experience an error like `curl: (60) SSL certificate problem`, try this:
+> ```HOMEBREW_FORCE_BREWED_CURL=1 brew install abinit```
 
 ## Building bottles
 *This section is for the* `abinit` *maintainers...*
