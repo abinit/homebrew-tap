@@ -1,18 +1,16 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-9.2.2.tar.gz"
-  sha256 "4999d48ed20655af7ee4015dc79fe5363db494eb330e71aeacb11870135fa95d"
-  # tag "chemistry"
-  # doi "10.1016/j.cpc.2019.107042"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-9.4.2.tar.gz"
+  sha256 "d40886f5c8b138bb4aa1ca05da23388eb70a682790cfe5020ecce4db1b1a76bc"
+  license "GPL-3.0-only"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    cellar :any
-    sha256 "e9e884a76bbffaa454a074d64a7e62d5b44ab2bbbc1dda67daa859b0e46d3664" => :big_sur
-    sha256 "4abde2ecfb5489c5a352f0a1252d19485d0005f4f4e03622175db1ab072eccfb" => :catalina
-    sha256 "bfe1535bc27e5134b5241e75f0061a10972be31d18cd6ccf5990264c31a9e7f9" => :mojave
-    sha256 "a4931e25ee118ba2b21a71843932ab8482a0686be2125a77d67fa045c6cbedbf" => :high_sierra
+    sha256 cellar: :any, big_sur:     "3df77cc215d807f5f7a91a6f4e3d25d12132f6a91a5f74b0fb7e8539f72e1ab9"
+    sha256 cellar: :any, catalina:    "bffa45cc99f12f8cb46e80c526d458de0a6b49c902577c80148f309f7ace9bf8"
+    sha256 cellar: :any, mojave:      "979a24a45c3c6641671387c6c51674d5e2996f6ad1dc5af69425449a7fd1f61e"
+    sha256 cellar: :any, high_sierra: "42825aaeb64ebd4980cd050fd38a3b3119b6032a7cacc610a7a0269398bae293"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -102,7 +100,7 @@ class Abinit < Formula
     if build.with? "test"
       # Execute quick tests
       system "./tests/runtests.py built-in fast &> make-check.log"
-      system "grep -A1 Suite make-check.log"
+      system "grep", "-A1", "Suite", "make-check.log"
       ohai `grep ", succeeded:" "make-check.log"`.chomp
       prefix.install "make-check.log"
     elsif build.with? "testsuite"

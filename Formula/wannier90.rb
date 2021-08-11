@@ -3,15 +3,14 @@ class Wannier90 < Formula
   homepage "http://www.wannier.org/"
   url "https://github.com/wannier-developers/wannier90/archive/v3.1.0.tar.gz"
   sha256 "40651a9832eb93dec20a8360dd535262c261c34e13c41b6755fa6915c936b254"
-  #doi:10.1088/1361-648X/ab51ff
+  # doi:10.1088/1361-648X/ab51ff
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    cellar :any
-    sha256 "57cb79b91f67977ac68e2cb2826118f7e11ba49e61793096668e89adfff70266" => :big_sur
-    sha256 "dd048b79f858881d95e562c641941922977e82350f8fd465a93d5228158a6b73" => :catalina
-    sha256 "422c90304167b01b41f28f49023f873f820fb954d116cdbd52b18153cc104092" => :mojave
-    sha256 "0597673252b1205daf986905f26e7c6186f43062a5c5d6ae3539e21d5b662421" => :high_sierra
+    sha256 cellar: :any, big_sur:     "2efe9e5a390412e58d8a2be4841bce41738067c859ed5717c42aceed137e9362"
+    sha256 cellar: :any, catalina:    "a23dbf46956f3b7d5932988fb6d8b918e821dc8349b2839cceeec35b1d0fb5df"
+    sha256 cellar: :any, mojave:      "1443b162052525b9000c9b210e1c969df0310b55aa13ee65b9f43f410e05e84c"
+    sha256 cellar: :any, high_sierra: "bacb585c45ef6c8f6b45243812c6d7063d30f5ed7db6cceaca7b73c1963ba70a"
   end
 
   option "without-test", "Skip build-time quick tests (not recommended)"
@@ -26,12 +25,13 @@ class Wannier90 < Formula
   def install
     cp "config/make.inc.macosx.homebrew", "make.inc"
     if OS.mac?
-      inreplace "make.inc", "-L/usr/local/opt/openblas/lib -lblas -llapack", "-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
+      inreplace "make.inc", "-L/usr/local/opt/openblas/lib -lblas -llapack",
+"-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
       inreplace "make.inc", "FCOPTS=-O2", "FCOPTS=-fallow-argument-mismatch -O2"
     end
     system "make", "all"
     system "make", "install", "PREFIX=#{prefix}"
-    cd "#{lib}"
+    cd lib.to_s
     ln_s "libwannier.a", "libwannier90.a", force: true
   end
   test do

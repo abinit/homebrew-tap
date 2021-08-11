@@ -3,16 +3,15 @@ class Abinit8 < Formula
   homepage "https://www.abinit.org/"
   url "https://www.abinit.org/sites/default/files/packages/abinit-8.10.3.tar.gz"
   sha256 "ed626424b4472b93256622fbb9c7645fa3ffb693d4b444b07d488771ea7eaa75"
-  # tag "chemistry"
-  # doi "10.1016/j.cpc.2016.04.003"
+  license "GPL-3.0-only"
+  revision 1
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    cellar :any
-    sha256 "0642c92a2e7d82b31123a53e291545af7600fd26dad1b0ed5e3b2fdcbf1253cd" => :big_sur
-    sha256 "7e2ee89929133853afecd86effefb60ef6a9d6ac29d9bd049f8588781e9895ef" => :catalina
-    sha256 "502a5e7155983f7e24dd043a732f6bfcd239b06e3658be39df18f5bfabc397bf" => :mojave
-    sha256 "9f4718b24b06f504fc37aeb80514fb12dcaf8328f3e4b2d87df6afc6fa3dfef6" => :high_sierra
+    sha256 cellar: :any, big_sur:     "c2855cd558864f8ef03d323d0e5ba61b0aa54bc601d20cc55fd083bca07d41e6"
+    sha256 cellar: :any, catalina:    "eeff69919396e1b795df8bfa64865ec14814e30cd6ebb8e194ca52ae893152f9"
+    sha256 cellar: :any, mojave:      "4413b6118bf24bb06607f27548e9af4d776a04dc495e47535205626ed8905044"
+    sha256 cellar: :any, high_sierra: "692084841a0f751ce4833cca3c0aa79e84dbfe1a82da44b72a010320d1c94597"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -22,7 +21,7 @@ class Abinit8 < Formula
   depends_on "gcc"
   depends_on "open-mpi"
   depends_on "fftw" => :recommended
-  depends_on "libxc" => :recommended
+  depends_on "libxc4" => :recommended
   depends_on "netcdf" => :recommended
   if OS.mac?
     depends_on "veclibfort"
@@ -93,10 +92,10 @@ class Abinit8 < Formula
               "-lfftw3 -lfftw3f -lfftw3_mpi -lfftw3f_mpi"
     end
 
-    if build.with? "libxc"
+    if build.with? "libxc4"
       dft_flavor="libxc"
-      args << "--with-libxc-incs=-I#{Formula["libxc"].opt_include}"
-      args << "--with-libxc-libs=-L#{Formula["libxc"].opt_lib} -lxcf90 -lxc"
+      args << "--with-libxc-incs=-I#{Formula["libxc4"].opt_include}"
+      args << "--with-libxc-libs=-L#{Formula["libxc4"].opt_lib} -lxcf90 -lxc"
     end
 
     args << "--with-linalg-flavor=#{linalg_flavor}"

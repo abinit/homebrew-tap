@@ -6,14 +6,13 @@ class Hdf5Parallel < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    cellar :any
-    sha256 "785d1471bf70cfcd93ca504bae3dfb9b0c71227fa7230414d9a5de689ab75301" => :big_sur
-    sha256 "397335e3f9d3d236a733ef522e4048238beca43075b62f64988ebc29b3e21e1f" => :catalina
-    sha256 "d62135b648adbd80c95834492bcc664654606a65a80c34cb63856296bc0a7f9d" => :mojave
-    sha256 "d8f7670c58ecdd7e0097c4c2c5921e0cf8a2df675c51c0c75f619db3b8d893a1" => :high_sierra
-   end
+    sha256 cellar: :any, big_sur:     "2fb7328f4b08fe154e2cebd915e11b5876aa8772976bf26b3edae680182b2eb9"
+    sha256 cellar: :any, catalina:    "a5a34d1a09a3d796635c97fd51dda34cfba04fcdd4ddaf1be3052d1cd5d115f8"
+    sha256 cellar: :any, mojave:      "af69e8c6dcb4e9b4c108b0de434253a71ffeb17f8f1337f572c7c57d8f6159f8"
+    sha256 cellar: :any, high_sierra: "44f1ca7c4c452970aadc8a1d786c47e7c5dab616cd92d8721154461330125c32"
+  end
 
-  keg_only "Conflict with serial hdf5 package"
+  keg_only "conflict with serial hdf5 package"
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
