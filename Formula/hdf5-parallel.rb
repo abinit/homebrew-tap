@@ -1,15 +1,15 @@
 class Hdf5Parallel < Formula
   desc "File format designed to store large amounts of data (parallel version)"
   homepage "https://www.hdfgroup.org/HDF5"
-  url "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/src/hdf5-1.12.0.tar.bz2"
-  sha256 "97906268640a6e9ce0cde703d5a71c9ac3092eded729591279bf2e3ca9765f61"
+  url "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.1/src/hdf5-1.12.1.tar.bz2"
+  sha256 "aaf9f532b3eda83d3d3adc9f8b40a9b763152218fa45349c3bc77502ca1f8f1c"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, big_sur:     "2fb7328f4b08fe154e2cebd915e11b5876aa8772976bf26b3edae680182b2eb9"
-    sha256 cellar: :any, catalina:    "a5a34d1a09a3d796635c97fd51dda34cfba04fcdd4ddaf1be3052d1cd5d115f8"
-    sha256 cellar: :any, mojave:      "af69e8c6dcb4e9b4c108b0de434253a71ffeb17f8f1337f572c7c57d8f6159f8"
-    sha256 cellar: :any, high_sierra: "44f1ca7c4c452970aadc8a1d786c47e7c5dab616cd92d8721154461330125c32"
+     sha256 cellar: :any, big_sur:     "b49763e7edc8c7b75a11f37695f8096c51d47955742229e5e1169eea267d5be7"
+     sha256 cellar: :any, catalina:    "54e5e204601606f4bbbc7adaf9029dfe549aba420083073f59cd4d3ee551c0ad"
+     sha256 cellar: :any, mojave:      "344fa9795ddb0f6568570b9e51b1bd757f6f204fe18f6f507690cb649bb3bb2e"
+#    sha256 cellar: :any, high_sierra: "44f1ca7c4c452970aadc8a1d786c47e7c5dab616cd92d8721154461330125c32"
   end
 
   keg_only "conflict with serial hdf5 package"

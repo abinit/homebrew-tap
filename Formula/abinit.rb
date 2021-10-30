@@ -1,16 +1,16 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-9.4.2.tar.gz"
-  sha256 "d40886f5c8b138bb4aa1ca05da23388eb70a682790cfe5020ecce4db1b1a76bc"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-9.6.1.tar.gz"
+  sha256 "b6a12760fd728eb4aacca431ae12150609565bedbaa89763f219fcd869f79ac6"
   license "GPL-3.0-only"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, big_sur:     "3df77cc215d807f5f7a91a6f4e3d25d12132f6a91a5f74b0fb7e8539f72e1ab9"
-    sha256 cellar: :any, catalina:    "bffa45cc99f12f8cb46e80c526d458de0a6b49c902577c80148f309f7ace9bf8"
-    sha256 cellar: :any, mojave:      "979a24a45c3c6641671387c6c51674d5e2996f6ad1dc5af69425449a7fd1f61e"
-    sha256 cellar: :any, high_sierra: "42825aaeb64ebd4980cd050fd38a3b3119b6032a7cacc610a7a0269398bae293"
+     sha256 cellar: :any, big_sur:     "72eea5cbe27897cc207016b804f9f6b51f50a3f5248860312d32e9bd0f153ada"
+     sha256 cellar: :any, catalina:    "8c766f766a2eaf822d48e7acba0e28002b22cb9295f48bfbe82888e982279ddc"
+     sha256 cellar: :any, mojave:      "ab525cff2be919469af750da2a827cdb4a6d2ff83b00492b8381cbdd24853207"
+#    sha256 cellar: :any, high_sierra: "42825aaeb64ebd4980cd050fd38a3b3119b6032a7cacc610a7a0269398bae293"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -67,10 +67,10 @@ class Abinit < Formula
       args << "--with-linalg-flavor=netlib"
       libs << if OS.mac?
         "LINALG_LIBS=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort " \
-        "-L#{Formula["scalapack"].opt_lib} -lscalapack"
+          "-L#{Formula["scalapack"].opt_lib} -lscalapack"
       else
         "LINALG_LIBS=-L#{Formula["lapack"].opt_lib} -lblas -llapack " \
-        "-L#{Formula["scalapack"].opt_lib} -lscalapack"
+          "-L#{Formula["scalapack"].opt_lib} -lscalapack"
       end
     else
       args << "--with-linalg-flavor=none"
