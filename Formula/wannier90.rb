@@ -7,10 +7,12 @@ class Wannier90 < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, big_sur:     "2efe9e5a390412e58d8a2be4841bce41738067c859ed5717c42aceed137e9362"
-    sha256 cellar: :any, catalina:    "a23dbf46956f3b7d5932988fb6d8b918e821dc8349b2839cceeec35b1d0fb5df"
-    sha256 cellar: :any, mojave:      "1443b162052525b9000c9b210e1c969df0310b55aa13ee65b9f43f410e05e84c"
-    sha256 cellar: :any, high_sierra: "bacb585c45ef6c8f6b45243812c6d7063d30f5ed7db6cceaca7b73c1963ba70a"
+    sha256 cellar: :any,                 arm64_big_sur: "d47a6a22c439fa659aeb70f7cef70f3e1636d6fad1456cb51313e13bd6fab251"
+    sha256 cellar: :any,                 big_sur:       "2efe9e5a390412e58d8a2be4841bce41738067c859ed5717c42aceed137e9362"
+    sha256 cellar: :any,                 catalina:      "a23dbf46956f3b7d5932988fb6d8b918e821dc8349b2839cceeec35b1d0fb5df"
+    sha256 cellar: :any,                 mojave:        "1443b162052525b9000c9b210e1c969df0310b55aa13ee65b9f43f410e05e84c"
+    sha256 cellar: :any,                 high_sierra:   "bacb585c45ef6c8f6b45243812c6d7063d30f5ed7db6cceaca7b73c1963ba70a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "af509c98f1357c0fa7220293e5f1378e52b28793780074c235f1106b659d4e1c"
   end
 
   option "without-test", "Skip build-time quick tests (not recommended)"
@@ -27,8 +29,8 @@ class Wannier90 < Formula
     if OS.mac?
       inreplace "make.inc", "-L/usr/local/opt/openblas/lib -lblas -llapack",
 "-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
-      inreplace "make.inc", "FCOPTS=-O2", "FCOPTS=-fallow-argument-mismatch -O2"
     end
+    inreplace "make.inc", "FCOPTS=-O2", "FCOPTS=-fallow-argument-mismatch -O2"
     system "make", "all"
     system "make", "install", "PREFIX=#{prefix}"
     cd lib.to_s

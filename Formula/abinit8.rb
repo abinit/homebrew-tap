@@ -8,10 +8,11 @@ class Abinit8 < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, big_sur:     "e562817edcd105d54f4c7fccf21f2fc2973c2172aaf1d203e9919ed1523ee3fc"
-    sha256 cellar: :any, catalina:    "c35ff30a69d93f38a42a4ff012c672e41630fd11060bb2ff36cbae0be294ae4c"
-    sha256 cellar: :any, mojave:      "8e9f1333d9f543ce942ab833bee86eb08e940e5552355706d50ad03cd0aa62f6"
-    sha256 cellar: :any, high_sierra: "692084841a0f751ce4833cca3c0aa79e84dbfe1a82da44b72a010320d1c94597"
+    sha256 cellar: :any,                 big_sur:      "e562817edcd105d54f4c7fccf21f2fc2973c2172aaf1d203e9919ed1523ee3fc"
+    sha256 cellar: :any,                 catalina:     "c35ff30a69d93f38a42a4ff012c672e41630fd11060bb2ff36cbae0be294ae4c"
+    sha256 cellar: :any,                 mojave:       "8e9f1333d9f543ce942ab833bee86eb08e940e5552355706d50ad03cd0aa62f6"
+    sha256 cellar: :any,                 high_sierra:  "82f7d7ed579dd8949f60123ca3670e34be5597f75bc36b1af0f215c6af44b3ec"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "8b2b3fda75071e6c6350fefe79260ca41ec312f3b4ef956536324472bccf3712"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -23,9 +24,11 @@ class Abinit8 < Formula
   depends_on "fftw" => :recommended
   depends_on "libxc4" => :recommended
   depends_on "netcdf" => :recommended
+  depends_on "scalapack" => :recommended
   if OS.mac?
     depends_on "veclibfort"
-    depends_on "scalapack" => :recommended
+  else
+    depends_on "lapack"
   end
 
   conflicts_with "abinit", because: "abinit 9 and abinit 8 share the same executables"
@@ -65,14 +68,21 @@ class Abinit8 < Formula
     linalg_flavor = "none"
     fft_flavor = "none"
 
-    if OS.mac?
-      if build.with? "scalapack"
-        linalg_flavor = "custom+scalapack"
-        args << "--with-linalg-libs=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort " \
-                "-L#{Formula["scalapack"].opt_lib} -lscalapack"
+    if build.with? "scalapack"
+      linalg_flavor = "custom+scalapack"
+      args << if OS.mac?
+        "--with-linalg-libs=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort " \
+          "-L#{Formula["scalapack"].opt_lib} -lscalapack"
       else
-        linalg_flavor = "custom"
-        args << "--with-linalg-libs=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
+        "--with-linalg-libs=-L#{Formula["lapack"].opt_lib} -lblas -llapack " \
+          "-L#{Formula["scalapack"].opt_lib} -lscalapack"
+      end
+    else
+      linalg_flavor = "custom"
+      args << if OS.mac?
+        "--with-linalg-libs=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
+      else
+        "--with-linalg-libs=-L#{Formula["lapack"].opt_lib} -lblas -llapack"
       end
     end
 

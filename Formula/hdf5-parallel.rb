@@ -6,10 +6,12 @@ class Hdf5Parallel < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-     sha256 cellar: :any, big_sur:     "b49763e7edc8c7b75a11f37695f8096c51d47955742229e5e1169eea267d5be7"
-     sha256 cellar: :any, catalina:    "54e5e204601606f4bbbc7adaf9029dfe549aba420083073f59cd4d3ee551c0ad"
-     sha256 cellar: :any, mojave:      "344fa9795ddb0f6568570b9e51b1bd757f6f204fe18f6f507690cb649bb3bb2e"
-#    sha256 cellar: :any, high_sierra: "44f1ca7c4c452970aadc8a1d786c47e7c5dab616cd92d8721154461330125c32"
+    sha256 cellar: :any,                 arm64_big_sur: "608cbbf899a3b260ddf5ec573a4297ef91f2ccb44ab75ee7ef67852741b9e418"
+    sha256 cellar: :any,                 big_sur:       "b49763e7edc8c7b75a11f37695f8096c51d47955742229e5e1169eea267d5be7"
+    sha256 cellar: :any,                 catalina:      "54e5e204601606f4bbbc7adaf9029dfe549aba420083073f59cd4d3ee551c0ad"
+    sha256 cellar: :any,                 mojave:        "344fa9795ddb0f6568570b9e51b1bd757f6f204fe18f6f507690cb649bb3bb2e"
+    sha256 cellar: :any,                 high_sierra:   "e029225d21b02445de7a9105d16a81b83dff99e48441548aa27a50f18b870c9f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "340898157149969c31710530b7f823bfbf7f6d6c7057b236ad1284ad1c8658c2"
   end
 
   keg_only "conflict with serial hdf5 package"

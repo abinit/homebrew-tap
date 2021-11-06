@@ -7,10 +7,12 @@ class Abinit < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-     sha256 cellar: :any, big_sur:     "72eea5cbe27897cc207016b804f9f6b51f50a3f5248860312d32e9bd0f153ada"
-     sha256 cellar: :any, catalina:    "8c766f766a2eaf822d48e7acba0e28002b22cb9295f48bfbe82888e982279ddc"
-     sha256 cellar: :any, mojave:      "ab525cff2be919469af750da2a827cdb4a6d2ff83b00492b8381cbdd24853207"
-#    sha256 cellar: :any, high_sierra: "42825aaeb64ebd4980cd050fd38a3b3119b6032a7cacc610a7a0269398bae293"
+    sha256                               arm64_big_sur: "bb76cfe88794b21a1c07b0c416b1fb0a03e675a67181a3760a1d63333b674d67"
+    sha256 cellar: :any,                 big_sur:       "72eea5cbe27897cc207016b804f9f6b51f50a3f5248860312d32e9bd0f153ada"
+    sha256 cellar: :any,                 catalina:      "8c766f766a2eaf822d48e7acba0e28002b22cb9295f48bfbe82888e982279ddc"
+    sha256 cellar: :any,                 mojave:        "ab525cff2be919469af750da2a827cdb4a6d2ff83b00492b8381cbdd24853207"
+    sha256 cellar: :any,                 high_sierra:   "e495135519fbc235bbc538de796051b386d3f6b15c0fbe098856ce7be46dffcd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "53be6fb6b15ec8a11f4090dcca64c787a8259b925ab549c4f6d6871f4ae7eee0"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -99,13 +101,23 @@ class Abinit < Formula
 
     if build.with? "test"
       # Execute quick tests
-      system "./tests/runtests.py built-in fast &> make-check.log"
-      system "grep", "-A1", "Suite", "make-check.log"
+      if OS.mac?
+        system "./tests/runtests.py built-in fast &> make-check.log"
+        system "grep", "-A2", "Suite", "make-check.log"
+      else
+        python_exe = `which python3`.size.positive? ? "python3" : "python"
+        system "#{python_exe} ./tests/runtests.py built-in fast &> make-check.log"
+      end
       ohai `grep ", succeeded:" "make-check.log"`.chomp
       prefix.install "make-check.log"
     elsif build.with? "testsuite"
       # Generate test database only
-      system "./tests/runtests.py fast[00] &> /dev/null"
+      if OS.mac?
+        system "./tests/runtests.py fast[00] &> /dev/null"
+      else
+        python_exe = `which python3`.size.positive? ? "python3" : "python"
+        system "#{python_exe} ./tests/runtests.py fast[00] &> make-check.log"
+      end
     end
 
     system "make", "install"

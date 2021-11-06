@@ -51,7 +51,7 @@ The app will then appear in the launcher.
 In the case of the `cask` nothing has to be done. The app will be in the launcher.
 
 ## Building bottles
-*This section is for the* `abinit` *maintainers...*
+*This section is for the* `abinit maintainers`*...*
 
 Homebrew formulae can include compiled binaries, which it calls "bottles". To build a new bottle (perhaps for a new operating system or Abinit release):
 
