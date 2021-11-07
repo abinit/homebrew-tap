@@ -7,7 +7,8 @@ class Libxc4 < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256                               arm64_big_sur: "f1751f44cf837dfb6316ac989ce971efaa8d695e1d0872b147a01ec1937859bf"
+    sha256 cellar: :any,                 arm64_big_sur: "f1751f44cf837dfb6316ac989ce971efaa8d695e1d0872b147a01ec1937859bf"
+    sha256 cellar: :any,                 monterey:      "95d75117759e18e3e30d0346b34d39b96aa1643739f4c20c91a81b315efdebc2"
     sha256 cellar: :any,                 big_sur:       "4c753f3313d0be80b227a7c493eaa047aac3c2988f8c1e3439312081cd7ff534"
     sha256 cellar: :any,                 catalina:      "88f4d8195e9f7c8e142a1d200989a1e75fb40181cb7ab853c77ac0f68602ef14"
     sha256 cellar: :any,                 mojave:        "07d379208b40693ebe0026b6cc2c8ede3d68f4000d2e3b065dc755956aa035ce"
@@ -23,6 +24,8 @@ class Libxc4 < Formula
   depends_on "gcc" # for gfortran
 
   def install
+    # Since monterey, need some patch for Fortran detection
+    inreplace "m4/fc_integer.m4", "write(1,'(i1)') i", "write(1,'(i1)') i ; close(1)"
     system "autoreconf", "-fiv"
     system "./configure", "--prefix=#{prefix}",
                           "--enable-shared",

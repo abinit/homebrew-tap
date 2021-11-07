@@ -7,6 +7,7 @@ class Hdf5Parallel < Formula
   bottle do
     root_url "http://forge.abinit.org/homebrew"
     sha256 cellar: :any,                 arm64_big_sur: "608cbbf899a3b260ddf5ec573a4297ef91f2ccb44ab75ee7ef67852741b9e418"
+    sha256 cellar: :any,                 monterey:      "a3467967d8bcc3eb15dbcf0686064af7476368082ad0d1827844184794871b48"
     sha256 cellar: :any,                 big_sur:       "b49763e7edc8c7b75a11f37695f8096c51d47955742229e5e1169eea267d5be7"
     sha256 cellar: :any,                 catalina:      "54e5e204601606f4bbbc7adaf9029dfe549aba420083073f59cd4d3ee551c0ad"
     sha256 cellar: :any,                 mojave:        "344fa9795ddb0f6568570b9e51b1bd757f6f204fe18f6f507690cb649bb3bb2e"
@@ -40,6 +41,11 @@ class Hdf5Parallel < Formula
     inreplace "src/Makefile.am",
               "settingsdir=$(libdir)",
               "settingsdir=#{pkgshare}"
+
+    # This is needed since Monterey and gfortran 11.2
+    inreplace "m4/aclocal_fc.f90",
+              "WRITE(8,'(I0)') num_rkinds",
+              "WRITE(8,'(I0)') num_rkinds ; CLOSE(8)"
 
     system "autoreconf", "-fiv"
 

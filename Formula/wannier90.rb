@@ -8,6 +8,7 @@ class Wannier90 < Formula
   bottle do
     root_url "http://forge.abinit.org/homebrew"
     sha256 cellar: :any,                 arm64_big_sur: "d47a6a22c439fa659aeb70f7cef70f3e1636d6fad1456cb51313e13bd6fab251"
+    sha256 cellar: :any,                 monterey:      "f24230479e42240f815975f6757dbd1990d0f3bbbfcb7134fcc7843ec610b4f3"
     sha256 cellar: :any,                 big_sur:       "2efe9e5a390412e58d8a2be4841bce41738067c859ed5717c42aceed137e9362"
     sha256 cellar: :any,                 catalina:      "a23dbf46956f3b7d5932988fb6d8b918e821dc8349b2839cceeec35b1d0fb5df"
     sha256 cellar: :any,                 mojave:        "1443b162052525b9000c9b210e1c969df0310b55aa13ee65b9f43f410e05e84c"
@@ -16,7 +17,7 @@ class Wannier90 < Formula
   end
 
   option "without-test", "Skip build-time quick tests (not recommended)"
-  depends_on "gcc" if OS.mac? # for gfortran
+  depends_on "gcc"
   depends_on "open-mpi"
   if OS.mac?
     depends_on "veclibfort"
