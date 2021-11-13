@@ -1,19 +1,19 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-9.6.1.tar.gz"
-  sha256 "b6a12760fd728eb4aacca431ae12150609565bedbaa89763f219fcd869f79ac6"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-9.6.2.tar.gz"
+  sha256 "b018c2ff24338a5952c5550a7e09d4c7793b62402c7aa4e09273e9a666e674fb"
   license "GPL-3.0-only"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any,                 arm64_big_sur: "bb76cfe88794b21a1c07b0c416b1fb0a03e675a67181a3760a1d63333b674d67"
-    sha256 cellar: :any,                 monterey:      "926e8e522c9b110331c64697145989827f3923306159d256d24aa5f4e2beba4e"
-    sha256 cellar: :any,                 big_sur:       "72eea5cbe27897cc207016b804f9f6b51f50a3f5248860312d32e9bd0f153ada"
-    sha256 cellar: :any,                 catalina:      "8c766f766a2eaf822d48e7acba0e28002b22cb9295f48bfbe82888e982279ddc"
-    sha256 cellar: :any,                 mojave:        "ab525cff2be919469af750da2a827cdb4a6d2ff83b00492b8381cbdd24853207"
-    sha256 cellar: :any,                 high_sierra:   "e495135519fbc235bbc538de796051b386d3f6b15c0fbe098856ce7be46dffcd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "53be6fb6b15ec8a11f4090dcca64c787a8259b925ab549c4f6d6871f4ae7eee0"
+    sha256 cellar: :any,                 arm64_big_sur: "104274223167d03251ed77fe2da660e9065187d8a0dc25621fef0a47a4abc4d1"
+    sha256 cellar: :any,                 monterey:      "eb026d76e6ef9bbe6334d34f6edbdece3d69f4043788a789bac050a238a6bd08"
+    sha256 cellar: :any,                 big_sur:       "39afd912d05321ae991b05891332364ba79dc26dbd0d35cbfa125f395e0fcb23"
+    sha256 cellar: :any,                 catalina:      "21bfcdc31a077849d0e94e80b5a7aeebcfa8b658f890b248854042239357e59a"
+    sha256 cellar: :any,                 mojave:        "4809ac39b2220b125a875bb32a61150a00ca4eec78571e110e0956bcfeb63e43"
+    sha256 cellar: :any,                 high_sierra:   "368609c7afcaef22d6d32de21f769a2fc331c7a898bb7b89b2ded8eb574e9883"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "132934a25ca8b7c15c9fbb9d0fdb4ecd95bc7f2046e1d8f51cda018db92842e9"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
