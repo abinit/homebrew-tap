@@ -22,7 +22,8 @@ class Abinit < Formula
 
   depends_on "gcc"
   depends_on "libxc"
-  depends_on "netcdf"
+  depends_on "netcdf" #Should be suppressed as dependence of netcdf-fortran
+  depends_on "netcdf-fortran"
   depends_on "open-mpi"
   # We should replace veclibfort and lapack by openblas when scalapack is in use!
   #   Just because scalapack depends on it
