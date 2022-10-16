@@ -1,0 +1,594 @@
+diff --git a/shared/common/src/33_xc_lowlevel/libxc_tools.c b/shared/common/src/33_xc_lowlevel/libxc_tools.c
+index dc1c1c1b0..f37f1f52b 100644
+--- a/shared/common/src/33_xc_lowlevel/libxc_tools.c
++++ b/shared/common/src/33_xc_lowlevel/libxc_tools.c
+@@ -62,7 +62,8 @@ void xc_get_family_constants(int *xc_cst_family_unknown,
+                              int *xc_cst_family_lca,
+                              int *xc_cst_family_oep,
+                              int *xc_cst_family_hyb_gga,
+-                             int *xc_cst_family_hyb_mgga)
++                             int *xc_cst_family_hyb_mgga,
++                             int *xc_cst_family_hyb_lda)
+ {
+  *xc_cst_family_unknown  = XC_FAMILY_UNKNOWN;
+  *xc_cst_family_lda      = XC_FAMILY_LDA;
+@@ -70,14 +71,14 @@ void xc_get_family_constants(int *xc_cst_family_unknown,
+  *xc_cst_family_mgga     = XC_FAMILY_MGGA;
+  *xc_cst_family_lca      = XC_FAMILY_LCA;
+  *xc_cst_family_oep      = XC_FAMILY_OEP;
+-#if ( XC_MAJOR_VERSION > 5 ) 
++ *xc_cst_family_hyb_gga  = XC_FAMILY_HYB_GGA;
++ *xc_cst_family_hyb_mgga = XC_FAMILY_HYB_MGGA;
++#if ( XC_MAJOR_VERSION > 5 )
+ /* ==== libXC v6.0 and later ==== */
+- *xc_cst_family_hyb_gga  = -11;
+- *xc_cst_family_hyb_mgga = -11;
++ *xc_cst_family_hyb_lda  = XC_FAMILY_HYB_LDA;
+ #else
+ /* ==== Before libXC v6.0 ==== */
+- *xc_cst_family_hyb_gga  = XC_FAMILY_HYB_GGA;
+- *xc_cst_family_hyb_mgga = XC_FAMILY_HYB_MGGA;
++ *xc_cst_family_hyb_lda  = -11;
+ #endif
+ }
+ 
+@@ -121,6 +122,9 @@ void xc_get_kind_constants(int *xc_cst_exchange,
+ 
+ /* ===============================================================
+  * Get the HYBRID constants
++ * This routine was only useful for a temporary version of LibXC
++ * (between v5.x and v6.x)
++ * It is kept here for historical reasons
+  * ===============================================================
+  */
+ void xc_get_hybrid_constants(int *xc_cst_hyb_none,
+@@ -137,7 +141,8 @@ void xc_get_hybrid_constants(int *xc_cst_hyb_none,
+ 							 int *xc_cst_hyb_double_hybrid,
+ 							 int *xc_cst_hyb_mixture)
+ {
+-#if ( XC_MAJOR_VERSION > 5 ) 
++/* This test should be always false */
++#if ( XC_MAJOR_VERSION > 50 )
+ /* ==== libXC v6.0 and later ==== */
+  *xc_cst_hyb_none          = XC_HYB_NONE;
+  *xc_cst_hyb_fock          = XC_HYB_FOCK;
+@@ -180,9 +185,9 @@ void xc_func_type_free(XC(func_type) **xc_func)
+  */
+ /* ---------------------------------------------------------------
+    ----- LDA ----- */
+-void xc_get_lda(const XC(func_type) *xc_func, int np, const double *rho, 
++void xc_get_lda(const XC(func_type) *xc_func, int np, const double *rho,
+         double *zk, double *vrho, double *v2rho2, double *v3rho3)
+-#if ( XC_MAJOR_VERSION > 4 ) 
++#if ( XC_MAJOR_VERSION > 4 )
+ /* ==== libXC v5.0 and later ==== */
+  {xc_lda(xc_func, np, rho, zk, vrho, v2rho2, v3rho3, NULL);}
+ #else
+@@ -196,7 +201,7 @@ void xc_get_gga(const XC(func_type) *xc_func, int np,
+         double *zk, double *vrho, double *vsigma,
+         double *v2rho2, double *v2rhosigma, double *v2sigma2,
+         double *v3rho3, double *v3rho2sigma, double *v3rhosigma2, double *v3sigma3)
+-#if ( XC_MAJOR_VERSION > 4 ) 
++#if ( XC_MAJOR_VERSION > 4 )
+ /* ==== libXC v5.0 and later ==== */
+  {xc_gga(xc_func, np, rho, sigma, zk, vrho, vsigma, v2rho2, v2rhosigma, v2sigma2,
+          v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3,
+@@ -213,8 +218,8 @@ void xc_get_mgga(const XC(func_type) *xc_func, int np,
+         double *zk, double *vrho, double *vsigma, double *vlapl, double *vtau,
+         double *v2rho2, double *v2rhosigma, double *v2rholapl, double *v2rhotau,
+         double *v2sigma2, double *v2sigmalapl, double *v2sigmatau, double *v2lapl2,
+-        double *v2lapltau, double *v2tau2) 
+-#if ( XC_MAJOR_VERSION > 4 ) 
++        double *v2lapltau, double *v2tau2)
++#if ( XC_MAJOR_VERSION > 4 )
+ /* ==== libXC v5.0 and later ==== */
+  {xc_mgga(xc_func, np, rho, sigma, lapl, tau, zk, vrho, vsigma, vlapl, vtau,
+           v2rho2, v2rhosigma, v2rholapl, v2rhotau, v2sigma2,
+@@ -226,7 +231,7 @@ void xc_get_mgga(const XC(func_type) *xc_func, int np,
+           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+ #else
+ /* ==== Before libXC v5.0 ==== */
+- {xc_mgga(xc_func, np, rho, sigma, lapl, tau, zk, vrho, vsigma, vlapl, vtau, 
++ {xc_mgga(xc_func, np, rho, sigma, lapl, tau, zk, vrho, vsigma, vlapl, vtau,
+ 		  v2rho2, v2sigma2, v2lapl2, v2tau2, v2rhosigma, v2rholapl, v2rhotau,
+ 		  v2sigmalapl, v2sigmatau, v2lapltau);}
+ #endif
+@@ -285,14 +290,14 @@ char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
+  * ===============================================================
+  */
+ void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_params)
+-#if ( XC_MAJOR_VERSION > 4 ) 
++#if ( XC_MAJOR_VERSION > 4 )
+ /* ==== libXC v5.0 and later ==== */
+  {if (n_ext_params == xc_func->info->ext_params.n)
+    {XC(func_set_ext_params)(xc_func, ext_params);}
+-#elif ( XC_MAJOR_VERSION > 3 ) 
++#elif ( XC_MAJOR_VERSION > 3 )
+ /* ==== libXC v4.0 ==== */
+  {if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
+-   /* set_ext_params function is missing for PBE0 */  
++   /* set_ext_params function is missing for PBE0 */
+    {xc_func->cam_alpha=ext_params[0];xc_func->mix_coef[0]=1.0-ext_params[0];}
+   else if (xc_func->info->number == XC_MGGA_X_TB09 && n_ext_params >= 1)
+    /* XC_MGGA_X_TB09 has only one parameter */
+@@ -306,7 +311,7 @@ void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_pa
+    {XC(lda_c_xalpha_set_params)(xc_func, *ext_params);}
+   else if (xc_func->info->number == XC_MGGA_X_TB09 && n_ext_params >= 1)
+    {XC(mgga_x_tb09_set_params)(xc_func, *ext_params);}
+-#if ( XC_MAJOR_VERSION > 2 || ( XC_MAJOR_VERSION > 1 && XC_MINOR_VERSION > 0 ) ) 
++#if ( XC_MAJOR_VERSION > 2 || ( XC_MAJOR_VERSION > 1 && XC_MINOR_VERSION > 0 ) )
+   else if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
+    {XC(hyb_gga_xc_pbeh_set_params)(xc_func, *ext_params);}
+   else if (xc_func->info->number == XC_HYB_GGA_XC_HSE03 && n_ext_params == 3)
+@@ -335,7 +340,7 @@ void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_pa
+  * ===============================================================
+  */
+ void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshold)
+-#if ( XC_MAJOR_VERSION > 3 ) 
++#if ( XC_MAJOR_VERSION > 3 )
+ /* ==== libXC v4.0 and later ==== */
+    {XC(func_set_dens_threshold)(xc_func, *dens_threshold);}
+ #else
+@@ -348,23 +353,21 @@ void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshol
+  * ===============================================================
+  */
+ int xc_func_is_hybrid_from_id(int func_id)
+-#if ( XC_MAJOR_VERSION > 5 ) 
++/* ==== Before libXC v6.0 ==== */
++ {int family; family=xc_family_from_id(func_id, NULL, NULL);
++#if ( XC_MAJOR_VERSION > 5 )
+ /* ==== libXC v6.0 and later ==== */
+- {xc_func_type func; int result=0;
+-  if(xc_func_init(&func,func_id,XC_UNPOLARIZED)==0)
+-    {if (func.hyb_number_terms>0)
+-      {if (func.hyb_type[0] != XC_HYB_NONE){result=1;}}}
+-  xc_func_end(&func);
+-  return result;
+- }
++  if (family==XC_FAMILY_HYB_GGA || family==XC_FAMILY_HYB_MGGA || family==XC_FAMILY_HYB_LDA)
++   {return 1;}
++  else
++   {return 0;}
+ #else
+ /* ==== Before libXC v6.0 ==== */
+- {int family; family=xc_family_from_id(func_id, NULL, NULL);
+-  if (family==XC_FAMILY_HYB_GGA || family==XC_FAMILY_HYB_MGGA)
++  if (family==XC_FAMILY_HYB_GGA || family==XC_FAMILY_HYB_MGGA )
+    {return 1;}
+   else
+    {return 0;}
+- }
+ #endif
++ }
+ 
+ #endif
+diff --git a/shared/common/src/33_xc_lowlevel/m_libxc_functionals.F90 b/shared/common/src/33_xc_lowlevel/m_libxc_functionals.F90
+index 2bd1e59f3..cadb2dee6 100644
+--- a/shared/common/src/33_xc_lowlevel/m_libxc_functionals.F90
++++ b/shared/common/src/33_xc_lowlevel/m_libxc_functionals.F90
+@@ -97,6 +97,7 @@ module libxc_functionals
+  integer,public,save :: XC_FAMILY_OEP           = 16
+  integer,public,save :: XC_FAMILY_HYB_GGA       = 32
+  integer,public,save :: XC_FAMILY_HYB_MGGA      = 64
++ integer,public,save :: XC_FAMILY_HYB_LDA       =128
+  integer,public,save :: XC_FLAGS_HAVE_EXC       =  1
+  integer,public,save :: XC_FLAGS_HAVE_VXC       =  2
+  integer,public,save :: XC_FLAGS_HAVE_FXC       =  4
+@@ -107,19 +108,6 @@ module libxc_functionals
+  integer,public,save :: XC_CORRELATION          =  1
+  integer,public,save :: XC_EXCHANGE_CORRELATION =  2
+  integer,public,save :: XC_KINETIC              =  3
+- integer,public,save :: XC_HYB_NONE             =  0
+- integer,public,save :: XC_HYB_FOCK             =  1
+- integer,public,save :: XC_HYB_PT2              =  2
+- integer,public,save :: XC_HYB_ERF_SR           =  4
+- integer,public,save :: XC_HYB_YUKAWA_SR        =  8
+- integer,public,save :: XC_HYB_GAUSSIAN_SR      = 16
+- integer,public,save :: XC_HYB_SEMILOCAL        =  0
+- integer,public,save :: XC_HYB_HYBRID           =  1
+- integer,public,save :: XC_HYB_CAM              =  2
+- integer,public,save :: XC_HYB_CAMY             =  3
+- integer,public,save :: XC_HYB_CAMG             =  4
+- integer,public,save :: XC_HYB_DOUBLE_HYBRID    =  5
+- integer,public,save :: XC_HYB_MIXTURE          = 32768
+  integer,public,save :: XC_SINGLE_PRECISION     =  0
+  logical,private,save :: libxc_constants_initialized=.false.
+ 
+@@ -265,11 +253,12 @@ module libxc_functionals
+ !
+  interface
+    subroutine xc_get_family_constants(xc_cst_unknown,xc_cst_lda,xc_cst_gga,xc_cst_mgga, &
+-&                                     xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga) &
+-&                                     bind(C)
++&                                     xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga, &
++&                                     xc_cst_hyb_mgga,xc_cst_hyb_lda) bind(C)
+      use iso_c_binding, only : C_INT
+      integer(C_INT) :: xc_cst_unknown,xc_cst_lda,xc_cst_gga,xc_cst_mgga, &
+-&                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga
++&                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga, &
++&                      xc_cst_hyb_lda
+    end subroutine xc_get_family_constants
+  end interface
+ !
+@@ -291,20 +280,6 @@ module libxc_functionals
+ &                      xc_cst_exchange_correlation,xc_cst_kinetic
+    end subroutine xc_get_kind_constants
+  end interface
+-!
+- interface
+-   subroutine xc_get_hybrid_constants(xc_cst_hyb_none, &
+-              xc_cst_hyb_fock,xc_cst_hyb_pt2,xc_cst_hyb_erf_sr,xc_cst_hyb_yukawa_sr, &
+-              xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, xc_cst_hyb_hybrid,xc_cst_hyb_cam, &
+-              xc_cst_hyb_camy,xc_cst_hyb_camg,xc_cst_hyb_double_hybrid, &
+-              xc_cst_hyb_mixture) bind(C)
+-     use iso_c_binding, only : C_INT
+-     integer(C_INT) :: xc_cst_hyb_none, xc_cst_hyb_fock,xc_cst_hyb_pt2, xc_cst_hyb_erf_sr, &
+-                       xc_cst_hyb_yukawa_sr,xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, &
+-                       xc_cst_hyb_hybrid,xc_cst_hyb_cam,xc_cst_hyb_camy,xc_cst_hyb_camg, &
+-                       xc_cst_hyb_double_hybrid,xc_cst_hyb_mixture
+-   end subroutine xc_get_hybrid_constants
+- end interface
+ !
+  interface
+    type(C_PTR) function xc_func_type_malloc() bind(C)
+@@ -367,7 +342,7 @@ contains
+ 
+ !Local variables-------------------------------
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+- integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13
++ integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9
+ #endif
+ 
+ ! *************************************************************************
+@@ -375,7 +350,7 @@ contains
+ #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+   call xc_get_singleprecision_constant(i1)
+   XC_SINGLE_PRECISION     = int(i1)
+-  call xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8)
++  call xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9)
+   XC_FAMILY_UNKNOWN       = int(i1)
+   XC_FAMILY_LDA           = int(i2)
+   XC_FAMILY_GGA           = int(i3)
+@@ -384,6 +359,7 @@ contains
+   XC_FAMILY_OEP           = int(i6)
+   XC_FAMILY_HYB_GGA       = int(i7)
+   XC_FAMILY_HYB_MGGA      = int(i8)
++  XC_FAMILY_HYB_LDA       = int(i9)
+   call xc_get_flags_constants(i1,i2,i3,i4,i5,i6)
+   XC_FLAGS_HAVE_EXC       = int(i1)
+   XC_FLAGS_HAVE_VXC       = int(i2)
+@@ -396,21 +372,7 @@ contains
+   XC_CORRELATION          = int(i2)
+   XC_EXCHANGE_CORRELATION = int(i3)
+   XC_KINETIC              = int(i4)
+-  call xc_get_hybrid_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13)
+-  XC_HYB_NONE             = int(i1)
+-  XC_HYB_FOCK             = int(i2)
+-  XC_HYB_PT2              = int(i3)
+-  XC_HYB_ERF_SR           = int(i4)
+-  XC_HYB_YUKAWA_SR        = int(i5)
+-  XC_HYB_GAUSSIAN_SR      = int(i6)
+-  XC_HYB_SEMILOCAL        = int(i7)
+-  XC_HYB_HYBRID           = int(i8)
+-  XC_HYB_CAM              = int(i9)
+-  XC_HYB_CAMY             = int(i10)
+-  XC_HYB_CAMG             = int(i11)
+-  XC_HYB_DOUBLE_HYBRID    = int(i12)
+-  XC_HYB_MIXTURE          = int(i13)
+- libxc_constants_initialized=.true.
++  libxc_constants_initialized=.true.
+ #endif
+ 
+  end subroutine libxc_functionals_constants_load
+diff --git a/shared/libpaw/src/libpaw_libxc.c b/shared/libpaw/src/libpaw_libxc.c
+index 58e280fd9..30a5fd501 100644
+--- a/shared/libpaw/src/libpaw_libxc.c
++++ b/shared/libpaw/src/libpaw_libxc.c
+@@ -59,7 +59,8 @@ void libpaw_xc_get_family_constants(int *xc_cst_family_unknown,
+                                     int *xc_cst_family_lca,
+                                     int *xc_cst_family_oep,
+                                     int *xc_cst_family_hyb_gga,
+-                                    int *xc_cst_family_hyb_mgga)
++                                    int *xc_cst_family_hyb_mgga,
++                                    int *xc_cst_family_hyb_lda)
+ {
+  *xc_cst_family_unknown  = XC_FAMILY_UNKNOWN;
+  *xc_cst_family_lda      = XC_FAMILY_LDA;
+@@ -67,14 +68,14 @@ void libpaw_xc_get_family_constants(int *xc_cst_family_unknown,
+  *xc_cst_family_mgga     = XC_FAMILY_MGGA;
+  *xc_cst_family_lca      = XC_FAMILY_LCA;
+  *xc_cst_family_oep      = XC_FAMILY_OEP;
+-#if ( XC_MAJOR_VERSION > 5 ) 
+-/* ==== libXC v6.0 and later ==== */
+- *xc_cst_family_hyb_gga  = -11;
+- *xc_cst_family_hyb_mgga = -11;
+-#else
+-/* ==== Before libXC v6.0 ==== */
+  *xc_cst_family_hyb_gga  = XC_FAMILY_HYB_GGA;
+  *xc_cst_family_hyb_mgga = XC_FAMILY_HYB_MGGA;
++#if ( XC_MAJOR_VERSION > 5 )
++ /* ==== libXC v6.0 and later ==== */
++ *xc_cst_family_hyb_lda  = XC_FAMILY_HYB_LDA;
++#else
++ /* ==== Before libXC v6.0 ==== */
++ *xc_cst_family_hyb_lda  = -11;
+ #endif
+ }
+ 
+@@ -116,51 +117,6 @@ void libpaw_xc_get_kind_constants(int *xc_cst_exchange,
+  *xc_cst_kinetic               = XC_KINETIC;
+ }
+ 
+-/* ===============================================================
+- * Get the HYBRID constants
+- * ===============================================================
+- */
+-void libpaw_xc_get_hybrid_constants(int *xc_cst_hyb_none,
+-                                    int *xc_cst_hyb_fock,
+-                                    int *xc_cst_hyb_pt2,
+-									int *xc_cst_hyb_erf_sr,
+-									int *xc_cst_hyb_yukawa_sr,
+-									int *xc_cst_hyb_gaussian_sr,
+-									int *xc_cst_hyb_semilocal,
+-									int *xc_cst_hyb_hybrid,
+-									int *xc_cst_hyb_cam,
+-									int *xc_cst_hyb_camy,
+-									int *xc_cst_hyb_camg,
+-									int *xc_cst_hyb_double_hybrid,
+-									int *xc_cst_hyb_mixture)
+-{
+-#if ( XC_MAJOR_VERSION > 5 ) 
+-/* ==== libXC v6.0 and later ==== */
+- *xc_cst_hyb_none          = XC_HYB_NONE;
+- *xc_cst_hyb_fock          = XC_HYB_FOCK;
+- *xc_cst_hyb_pt2           = XC_HYB_PT2;
+- *xc_cst_hyb_erf_sr        = XC_HYB_ERF_SR;
+- *xc_cst_hyb_yukawa_sr     = XC_HYB_YUKAWA_SR;
+- *xc_cst_hyb_gaussian_sr   = XC_HYB_GAUSSIAN_SR;
+- *xc_cst_hyb_semilocal     = XC_HYB_SEMILOCAL;
+- *xc_cst_hyb_hybrid        = XC_HYB_HYBRID;
+- *xc_cst_hyb_cam           = XC_HYB_CAM;
+- *xc_cst_hyb_camy          = XC_HYB_CAMY;
+- *xc_cst_hyb_camg          = XC_HYB_CAMG;
+- *xc_cst_hyb_double_hybrid = XC_HYB_DOUBLE_HYBRID;
+- *xc_cst_hyb_mixture       = XC_HYB_MIXTURE;
+-#else
+-/* ==== Before libXC v6.0 ==== */
+- *xc_cst_hyb_none      = -11; *xc_cst_hyb_fock          = -11;
+- *xc_cst_hyb_pt2       = -11; *xc_cst_hyb_erf_sr        = -11;
+- *xc_cst_hyb_yukawa_sr = -11; *xc_cst_hyb_gaussian_sr   = -11;
+- *xc_cst_hyb_semilocal = -11; *xc_cst_hyb_hybrid        = -11;
+- *xc_cst_hyb_cam       = -11; *xc_cst_hyb_camy          = -11;
+- *xc_cst_hyb_camg      = -11; *xc_cst_hyb_double_hybrid = -11;
+- *xc_cst_hyb_mixture   = -11;
+-#endif
+-}
+-
+ /* ===============================================================
+  * Allocate/free xc_func_type pointer
+  * ===============================================================
+@@ -177,9 +133,9 @@ void libpaw_xc_func_type_free(XC(func_type) **xc_func)
+  */
+ /* ---------------------------------------------------------------
+    ----- LDA ----- */
+-void libpaw_xc_get_lda(const XC(func_type) *xc_func, int np, const double *rho, 
++void libpaw_xc_get_lda(const XC(func_type) *xc_func, int np, const double *rho,
+         double *zk, double *vrho, double *v2rho2, double *v3rho3)
+-#if ( XC_MAJOR_VERSION > 4 ) 
++#if ( XC_MAJOR_VERSION > 4 )
+ /* ==== libXC v5.0 and later ==== */
+  {xc_lda(xc_func, np, rho, zk, vrho, v2rho2, v3rho3, NULL);}
+ #else
+@@ -193,7 +149,7 @@ void libpaw_xc_get_gga(const XC(func_type) *xc_func, int np,
+         double *zk, double *vrho, double *vsigma,
+         double *v2rho2, double *v2rhosigma, double *v2sigma2,
+         double *v3rho3, double *v3rho2sigma, double *v3rhosigma2, double *v3sigma3)
+-#if ( XC_MAJOR_VERSION > 4 ) 
++#if ( XC_MAJOR_VERSION > 4 )
+ /* ==== libXC v5.0 and later ==== */
+  {xc_gga(xc_func, np, rho, sigma, zk, vrho, vsigma, v2rho2, v2rhosigma, v2sigma2,
+          v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3,
+@@ -210,8 +166,8 @@ void libpaw_xc_get_mgga(const XC(func_type) *xc_func, int np,
+         double *zk, double *vrho, double *vsigma, double *vlapl, double *vtau,
+         double *v2rho2, double *v2rhosigma, double *v2rholapl, double *v2rhotau,
+         double *v2sigma2, double *v2sigmalapl, double *v2sigmatau, double *v2lapl2,
+-        double *v2lapltau, double *v2tau2) 
+-#if ( XC_MAJOR_VERSION > 4 ) 
++        double *v2lapltau, double *v2tau2)
++#if ( XC_MAJOR_VERSION > 4 )
+ /* ==== libXC v5.0 and later ==== */
+  {xc_mgga(xc_func, np, rho, sigma, lapl, tau, zk, vrho, vsigma, vlapl, vtau,
+           v2rho2, v2rhosigma, v2rholapl, v2rhotau, v2sigma2,
+@@ -223,7 +179,7 @@ void libpaw_xc_get_mgga(const XC(func_type) *xc_func, int np,
+           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+ #else
+ /* ==== Before libXC v5.0 ==== */
+- {xc_mgga(xc_func, np, rho, sigma, lapl, tau, zk, vrho, vsigma, vlapl, vtau, 
++ {xc_mgga(xc_func, np, rho, sigma, lapl, tau, zk, vrho, vsigma, vlapl, vtau,
+ 		  v2rho2, v2sigma2, v2lapl2, v2tau2, v2rhosigma, v2rholapl, v2rhotau,
+ 		  v2sigmalapl, v2sigmatau, v2lapltau);}
+ #endif
+@@ -282,14 +238,14 @@ char const *libpaw_xc_get_info_refs(XC(func_type) *xc_func, const int *number)
+  * ===============================================================
+  */
+ void libpaw_xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_params)
+-#if ( XC_MAJOR_VERSION > 4 ) 
++#if ( XC_MAJOR_VERSION > 4 )
+ /* ==== libXC v5.0 and later ==== */
+  {if (n_ext_params == xc_func->info->ext_params.n)
+    {xc_func_set_ext_params(xc_func, ext_params);}
+-#elif ( XC_MAJOR_VERSION > 3 ) 
++#elif ( XC_MAJOR_VERSION > 3 )
+ /* ==== libXC v4.0 ==== */
+  {if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
+-   /* set_ext_params function is missing for PBE0 */  
++   /* set_ext_params function is missing for PBE0 */
+    {xc_func->cam_alpha=ext_params[0];xc_func->mix_coef[0]=1.0-ext_params[0];}
+   else if (xc_func->info->number == XC_MGGA_X_TB09 && n_ext_params >=1)
+    /* XC_MGGA_X_TB09 has only one parameter */
+@@ -303,7 +259,7 @@ void libpaw_xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n
+    {XC(lda_c_xalpha_set_params)(xc_func, *ext_params);}
+   else if (xc_func->info->number == XC_MGGA_X_TB09 && n_ext_params >= 1)
+    {XC(mgga_x_tb09_set_params)(xc_func, ext_params[0]);}
+-#if ( XC_MAJOR_VERSION > 2 || ( XC_MAJOR_VERSION > 1 && XC_MINOR_VERSION > 0 ) ) 
++#if ( XC_MAJOR_VERSION > 2 || ( XC_MAJOR_VERSION > 1 && XC_MINOR_VERSION > 0 ) )
+   else if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
+    {XC(hyb_gga_xc_pbeh_set_params)(xc_func, *ext_params);}
+   else if (xc_func->info->number == XC_HYB_GGA_XC_HSE03 && n_ext_params == 3)
+@@ -332,7 +288,7 @@ void libpaw_xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n
+  * ===============================================================
+  */
+ void libpaw_xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshold)
+-#if ( XC_MAJOR_VERSION > 3 ) 
++#if ( XC_MAJOR_VERSION > 3 )
+ /* ==== libXC v4.0 and later ==== */
+    {XC(func_set_dens_threshold)(xc_func, *dens_threshold);}
+ #else
+@@ -345,23 +301,20 @@ void libpaw_xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_t
+  * ===============================================================
+  */
+ int libpaw_xc_func_is_hybrid_from_id(int func_id)
+-#if ( XC_MAJOR_VERSION > 5 ) 
++ {int family; family=xc_family_from_id(func_id, NULL, NULL);
++#if ( XC_MAJOR_VERSION > 5 )
+ /* ==== libXC v6.0 and later ==== */
+- {xc_func_type func; int result=0;
+-  if(xc_func_init(&func,func_id,XC_UNPOLARIZED)==0)
+-    {if (func.hyb_number_terms>0)
+-      {if (func.hyb_type[0] != XC_HYB_NONE){result=1;}}}
+-  xc_func_end(&func);
+-  return result;
+- }
++  if (family==XC_FAMILY_HYB_GGA || family==XC_FAMILY_HYB_MGGA || family==XC_FAMILY_HYB_LDA)
++   {return 1;}
++  else
++   {return 0;}
+ #else
+ /* ==== Before libXC v6.0 ==== */
+- {int family; family=xc_family_from_id(func_id, NULL, NULL);
+-  if (family==XC_FAMILY_HYB_GGA || family==XC_FAMILY_HYB_MGGA)
++  if (family==XC_FAMILY_HYB_GGA || family==XC_FAMILY_HYB_MGGA )
+    {return 1;}
+   else
+    {return 0;}
+- }
+ #endif
++ }
+ 
+ #endif
+diff --git a/shared/libpaw/src/m_libpaw_libxc.F90 b/shared/libpaw/src/m_libpaw_libxc.F90
+index a3195be9f..d51133c92 100644
+--- a/shared/libpaw/src/m_libpaw_libxc.F90
++++ b/shared/libpaw/src/m_libpaw_libxc.F90
+@@ -85,6 +85,7 @@ module m_libpaw_libxc_funcs
+  integer,public,save :: LIBPAW_XC_FAMILY_OEP           = 16
+  integer,public,save :: LIBPAW_XC_FAMILY_HYB_GGA       = 32
+  integer,public,save :: LIBPAW_XC_FAMILY_HYB_MGGA      = 64
++ integer,public,save :: LIBPAW_XC_FAMILY_HYB_LDA       =128
+  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_EXC       =  1
+  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_VXC       =  2
+  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_FXC       =  4
+@@ -95,19 +96,6 @@ module m_libpaw_libxc_funcs
+  integer,public,save :: LIBPAW_XC_CORRELATION          =  1
+  integer,public,save :: LIBPAW_XC_EXCHANGE_CORRELATION =  2
+  integer,public,save :: LIBPAW_XC_KINETIC              =  3
+- integer,public,save :: LIBPAW_XC_HYB_NONE             =  0
+- integer,public,save :: LIBPAW_XC_HYB_FOCK             =  1
+- integer,public,save :: LIBPAW_XC_HYB_PT2              =  2
+- integer,public,save :: LIBPAW_XC_HYB_ERF_SR           =  4
+- integer,public,save :: LIBPAW_XC_HYB_YUKAWA_SR        =  8
+- integer,public,save :: LIBPAW_XC_HYB_GAUSSIAN_SR      = 16
+- integer,public,save :: LIBPAW_XC_HYB_SEMILOCAL        =  0
+- integer,public,save :: LIBPAW_XC_HYB_HYBRID           =  1
+- integer,public,save :: LIBPAW_XC_HYB_CAM              =  2
+- integer,public,save :: LIBPAW_XC_HYB_CAMY             =  3
+- integer,public,save :: LIBPAW_XC_HYB_CAMG             =  4
+- integer,public,save :: LIBPAW_XC_HYB_DOUBLE_HYBRID    =  5
+- integer,public,save :: LIBPAW_XC_HYB_MIXTURE          = 32768
+  integer,public,save :: LIBPAW_XC_SINGLE_PRECISION     =  0
+  logical,private,save :: libpaw_xc_constants_initialized=.false.
+ 
+@@ -261,11 +249,13 @@ module m_libpaw_libxc_funcs
+ !
+  interface
+    subroutine libpaw_xc_get_family_constants(xc_cst_unknown,xc_cst_lda,xc_cst_gga, &
+-&             xc_cst_mgga,xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga) &
++&             xc_cst_mgga,xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga, &
++&             xc_cst_hyb_lda) &
+ &             bind(C,name="libpaw_xc_get_family_constants")
+      use iso_c_binding, only : C_INT
+      integer(C_INT) :: xc_cst_unknown,xc_cst_lda,xc_cst_gga,xc_cst_mgga, &
+-&                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga
++&                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga, &
++&                      xc_cst_hyb_lda
+    end subroutine libpaw_xc_get_family_constants
+  end interface
+ !
+@@ -289,20 +279,6 @@ module m_libpaw_libxc_funcs
+ &                      xc_cst_exchange_correlation,xc_cst_kinetic
+    end subroutine libpaw_xc_get_kind_constants
+  end interface
+-!
+- interface
+-   subroutine libpaw_xc_get_hybrid_constants(xc_cst_hyb_none, &
+-              xc_cst_hyb_fock,xc_cst_hyb_pt2,xc_cst_hyb_erf_sr,xc_cst_hyb_yukawa_sr, &
+-              xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, xc_cst_hyb_hybrid,xc_cst_hyb_cam, &
+-              xc_cst_hyb_camy,xc_cst_hyb_camg,xc_cst_hyb_double_hybrid, &
+-              xc_cst_hyb_mixture) bind(C,name="libpaw_xc_get_hybrid_constants")
+-     use iso_c_binding, only : C_INT
+-     integer(C_INT) :: xc_cst_hyb_none, xc_cst_hyb_fock,xc_cst_hyb_pt2, xc_cst_hyb_erf_sr, &
+-                       xc_cst_hyb_yukawa_sr,xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, &
+-                       xc_cst_hyb_hybrid,xc_cst_hyb_cam,xc_cst_hyb_camy,xc_cst_hyb_camg, &
+-                       xc_cst_hyb_double_hybrid,xc_cst_hyb_mixture
+-   end subroutine libpaw_xc_get_hybrid_constants
+- end interface
+ !
+  interface
+    type(C_PTR) function libpaw_xc_func_type_malloc() &
+@@ -371,7 +347,7 @@ contains
+ 
+ !Local variables-------------------------------
+ #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
+- integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13
++ integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9
+ #endif
+ 
+ ! *************************************************************************
+@@ -379,7 +355,7 @@ contains
+ #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
+   call libpaw_xc_get_singleprecision_constant(i1)
+   LIBPAW_XC_SINGLE_PRECISION     = int(i1)
+-  call libpaw_xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8)
++  call libpaw_xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9)
+   LIBPAW_XC_FAMILY_UNKNOWN       = int(i1)
+   LIBPAW_XC_FAMILY_LDA           = int(i2)
+   LIBPAW_XC_FAMILY_GGA           = int(i3)
+@@ -388,6 +364,7 @@ contains
+   LIBPAW_XC_FAMILY_OEP           = int(i6)
+   LIBPAW_XC_FAMILY_HYB_GGA       = int(i7)
+   LIBPAW_XC_FAMILY_HYB_MGGA      = int(i8)
++  LIBPAW_XC_FAMILY_HYB_LDA       = int(i9)
+   call libpaw_xc_get_flags_constants(i1,i2,i3,i4,i5,i6)
+   LIBPAW_XC_FLAGS_HAVE_EXC       = int(i1)
+   LIBPAW_XC_FLAGS_HAVE_VXC       = int(i2)
+@@ -400,20 +377,6 @@ contains
+   LIBPAW_XC_CORRELATION          = int(i2)
+   LIBPAW_XC_EXCHANGE_CORRELATION = int(i3)
+   LIBPAW_XC_KINETIC              = int(i4)
+-  call libpaw_xc_get_hybrid_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13)
+-  LIBPAW_XC_HYB_NONE             = int(i1)
+-  LIBPAW_XC_HYB_FOCK             = int(i2)
+-  LIBPAW_XC_HYB_PT2              = int(i3)
+-  LIBPAW_XC_HYB_ERF_SR           = int(i4)
+-  LIBPAW_XC_HYB_YUKAWA_SR        = int(i5)
+-  LIBPAW_XC_HYB_GAUSSIAN_SR      = int(i6)
+-  LIBPAW_XC_HYB_SEMILOCAL        = int(i7)
+-  LIBPAW_XC_HYB_HYBRID           = int(i8)
+-  LIBPAW_XC_HYB_CAM              = int(i9)
+-  LIBPAW_XC_HYB_CAMY             = int(i10)
+-  LIBPAW_XC_HYB_CAMG             = int(i11)
+-  LIBPAW_XC_HYB_DOUBLE_HYBRID    = int(i12)
+-  LIBPAW_XC_HYB_MIXTURE          = int(i13)
+   libpaw_xc_constants_initialized=.true.
+ #endif
+ 
