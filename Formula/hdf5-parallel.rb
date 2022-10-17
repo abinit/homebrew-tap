@@ -1,28 +1,29 @@
 class Hdf5Parallel < Formula
+  # Adapted from official hdf5 formula to use MPI I/O
   desc "File format designed to store large amounts of data (parallel version)"
   homepage "https://www.hdfgroup.org/HDF5"
-  url "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.1/src/hdf5-1.12.1.tar.bz2"
-  sha256 "aaf9f532b3eda83d3d3adc9f8b40a9b763152218fa45349c3bc77502ca1f8f1c"
+  url "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/src/hdf5-1.12.2.tar.bz2"
+  sha256 "1a88bbe36213a2cea0c8397201a459643e7155c9dc91e062675b3fb07ee38afe"
+  license "BSD-3-Clause"
+  version_scheme 1
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any,                 arm64_big_sur: "608cbbf899a3b260ddf5ec573a4297ef91f2ccb44ab75ee7ef67852741b9e418"
-    sha256 cellar: :any,                 monterey:      "a3467967d8bcc3eb15dbcf0686064af7476368082ad0d1827844184794871b48"
-    sha256 cellar: :any,                 big_sur:       "b49763e7edc8c7b75a11f37695f8096c51d47955742229e5e1169eea267d5be7"
-    sha256 cellar: :any,                 catalina:      "54e5e204601606f4bbbc7adaf9029dfe549aba420083073f59cd4d3ee551c0ad"
-    sha256 cellar: :any,                 mojave:        "344fa9795ddb0f6568570b9e51b1bd757f6f204fe18f6f507690cb649bb3bb2e"
-    sha256 cellar: :any,                 high_sierra:   "e029225d21b02445de7a9105d16a81b83dff99e48441548aa27a50f18b870c9f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "340898157149969c31710530b7f823bfbf7f6d6c7057b236ad1284ad1c8658c2"
+    sha256 cellar: :any, monterey: "b54fec7c1b12cb1a449af68c5fc7190254ef61053993fae56e6ce95da66581cc"
+    sha256 cellar: :any, big_sur:  "33ce529817dfbd178125a324d7a066ac5016c7fddfc2eed5b4ac6f72b16d574c"
+    sha256 cellar: :any, catalina: "bb5a041cdfb4e0488536ec259e3aeed03c17393804c7876b4eaa5b3ad4626f67"
+    sha256 cellar: :any, mojave:   "95c13dd0f16d23b355965aa4cecced52c87a130f592c93748f352af254562b9c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "af952c5f0e5517f32ecdb120254d1c2cb06b696da5e15a39b60a0ec37543f119"
   end
 
-  keg_only "conflict with serial hdf5 package"
+  keg_only "conflict with serial hdf5 and hdf5-mpi packages"
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
   depends_on "gcc" # for gfortran
+  depends_on "libaec"
   depends_on "open-mpi"
-  depends_on "szip"
 
   uses_from_macos "zlib"
 
@@ -35,33 +36,34 @@ class Hdf5Parallel < Formula
     ENV["FC"] = "mpifort"
 
     inreplace %w[c++/src/h5c++.in fortran/src/h5fc.in bin/h5cc.in],
-      "${libdir}/libhdf5.settings",
-      "#{pkgshare}/libhdf5.settings"
+              "${libdir}/libhdf5.settings",
+              "#{pkgshare}/libhdf5.settings"
 
     inreplace "src/Makefile.am",
               "settingsdir=$(libdir)",
               "settingsdir=#{pkgshare}"
 
-    # This is needed since Monterey and gfortran 11.2
-    inreplace "m4/aclocal_fc.f90",
-              "WRITE(8,'(I0)') num_rkinds",
-              "WRITE(8,'(I0)') num_rkinds ; CLOSE(8)"
-
-    system "autoreconf", "-fiv"
+    system "autoreconf", "--force", "--install", "--verbose"
 
     args = %W[
       --disable-dependency-tracking
       --disable-silent-rules
-      --prefix=#{prefix}
-      --with-szlib=#{Formula["szip"].opt_prefix}
       --enable-build-mode=production
       --enable-fortran
       --enable-cxx
       --enable-unsupported
       --enable-parallel
+      --prefix=#{prefix}
+      --with-szlib=#{Formula["libaec"].opt_prefix}
     ]
+    args << "--with-zlib=#{Formula["zlib"].opt_prefix}" if OS.linux?
 
     system "./configure", *args
+
+    # Avoid shims in settings file
+    # inreplace "src/libhdf5.settings", Superenv.shims_path/ENV.cxx, ENV.cxx
+    # inreplace "src/libhdf5.settings", Superenv.shims_path/ENV.cc, ENV.cc
+
     system "make", "install"
   end
 

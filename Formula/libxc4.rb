@@ -2,18 +2,16 @@ class Libxc4 < Formula
   desc "Library of exchange and correlation functionals for codes (abinit version)"
   homepage "https://tddft.org/programs/libxc/"
   url "https://gitlab.com/libxc/libxc/-/archive/4.3.4/libxc-4.3.4.tar.bz2"
-  sha256 "0efe8b33d151de8787e33c4ba8e2161ffb9da978753f3bd12c5c0a018e7d3ef5"
+  sha256 "ff7228953b39c79189ed31f78a082f36badfd0f25cdc125c3ca153ad1cc1ea84"
   license "MPL-2.0"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any,                 arm64_big_sur: "f1751f44cf837dfb6316ac989ce971efaa8d695e1d0872b147a01ec1937859bf"
-    sha256 cellar: :any,                 monterey:      "95d75117759e18e3e30d0346b34d39b96aa1643739f4c20c91a81b315efdebc2"
-    sha256 cellar: :any,                 big_sur:       "4c753f3313d0be80b227a7c493eaa047aac3c2988f8c1e3439312081cd7ff534"
-    sha256 cellar: :any,                 catalina:      "88f4d8195e9f7c8e142a1d200989a1e75fb40181cb7ab853c77ac0f68602ef14"
-    sha256 cellar: :any,                 mojave:        "07d379208b40693ebe0026b6cc2c8ede3d68f4000d2e3b065dc755956aa035ce"
-    sha256 cellar: :any,                 high_sierra:   "95ebdcf8c3c10f7d5e69ac5bf3446b31a904a083e120def84d55ca585d69f2ea"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3d2b35b0f07621c34facd0b0496b6c2403404717ff98277c6a79e31e75fa845a"
+    sha256 cellar: :any, monterey: "13a88c809e6182dc146e897fabd526df32a49359ce43f945c5c29b127e9b4150"
+    sha256 cellar: :any, big_sur:  "18e48b10cff3d12ec9f8fc0a489944a7905e7cc2d41166e299cf4870aa579aff"
+    sha256 cellar: :any, catalina: "48586ad13671559dc8631445dca16ea147602dd51c03d2536413abceb927a3fa"
+    sha256 cellar: :any, mojave:   "ba417cef01d084aed667605278f4896beccbf9ba0fb6950a19f9cc31ef024c4e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "614393513c09b8d3fc1b7fdf46e8e227c798024e36846015ce61216259479f2c"
   end
 
   keg_only "conflict with official libxc library"
