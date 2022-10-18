@@ -4,16 +4,15 @@ class Abinit8 < Formula
   url "https://www.abinit.org/sites/default/files/packages/abinit-8.10.3.tar.gz"
   sha256 "ed626424b4472b93256622fbb9c7645fa3ffb693d4b444b07d488771ea7eaa75"
   license "GPL-3.0-only"
-  revision 1
+  revision 2
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any,                 monterey:     "e1da3e4f4cc2aea101d5c8df5ef451f4e8f27915acb5616543109814d08f6a9a"
-    sha256 cellar: :any,                 big_sur:      "e562817edcd105d54f4c7fccf21f2fc2973c2172aaf1d203e9919ed1523ee3fc"
-    sha256 cellar: :any,                 catalina:     "c35ff30a69d93f38a42a4ff012c672e41630fd11060bb2ff36cbae0be294ae4c"
-    sha256 cellar: :any,                 mojave:       "8e9f1333d9f543ce942ab833bee86eb08e940e5552355706d50ad03cd0aa62f6"
-    sha256 cellar: :any,                 high_sierra:  "82f7d7ed579dd8949f60123ca3670e34be5597f75bc36b1af0f215c6af44b3ec"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "8b2b3fda75071e6c6350fefe79260ca41ec312f3b4ef956536324472bccf3712"
+    sha256 cellar: :any, monterey: "e9fe271a032abcb585fcf784ed42fc077750592af78d633da5b0629127daf326"
+    sha256 cellar: :any, big_sur:  "9882511ab63c4d21e7806eaa48855450c41709c138df7ab6ad882d04dcf4ff98"
+    sha256 cellar: :any, catalina: "ba010064a556c52e2b3e863f9aea6c757f5394de75b09ea76c01614092a77a04"
+    sha256 cellar: :any, mojave: "f4e1d29df70c14ef30399ea07ad2a0eb004859567a774cc6d3defaf63d2d866f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "5fa637484095904bfd29ee748fdfb02e832bf42ce6d1688b83cffbcc9c6ece38"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -22,15 +21,12 @@ class Abinit8 < Formula
 
   depends_on "gcc"
   depends_on "open-mpi"
+  depends_on "openblas"
   depends_on "fftw" => :recommended
   depends_on "libxc4" => :recommended
   depends_on "netcdf" => :recommended
+  depends_on "netcdf-fortran" => :recommended
   depends_on "scalapack" => :recommended
-  if OS.mac?
-    depends_on "veclibfort"
-  else
-    depends_on "lapack"
-  end
 
   conflicts_with "abinit", because: "abinit 9 and abinit 8 share the same executables"
 
@@ -71,26 +67,19 @@ class Abinit8 < Formula
 
     if build.with? "scalapack"
       linalg_flavor = "custom+scalapack"
-      args << if OS.mac?
-        "--with-linalg-libs=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort " \
-          "-L#{Formula["scalapack"].opt_lib} -lscalapack"
-      else
-        "--with-linalg-libs=-L#{Formula["lapack"].opt_lib} -lblas -llapack " \
-          "-L#{Formula["scalapack"].opt_lib} -lscalapack"
-      end
+      args << "--with-linalg-libs=-L#{Formula["openblas"].opt_lib} -lopenblas " \
+              "-L#{Formula["scalapack"].opt_lib} -lscalapack"
     else
       linalg_flavor = "custom"
-      args << if OS.mac?
-        "--with-linalg-libs=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
-      else
-        "--with-linalg-libs=-L#{Formula["lapack"].opt_lib} -lblas -llapack"
-      end
+      args << "--with-linalg-libs=-L#{Formula["openblas"].opt_lib} -lopenblas"
     end
 
     if build.with? "netcdf"
       trio_flavor = "netcdf"
-      args << "--with-netcdf-incs=-I#{Formula["netcdf"].opt_include}"
-      args << "--with-netcdf-libs=-L#{Formula["netcdf"].opt_lib} -lnetcdff -lnetcdf"
+      args << "--with-netcdf-incs=-I#{Formula["netcdf"].opt_include} " \
+              "-I#{Formula["netcdf-fortran"].opt_include}"
+      args << "--with-netcdf-libs=-L#{Formula["netcdf"].opt_lib} " \
+              "-L#{Formula["netcdf-fortran"].opt_lib} -lnetcdff -lnetcdf"
     end
 
     # Need to link against single precision as well,
@@ -118,18 +107,21 @@ class Abinit8 < Formula
     system "make"
 
     if build.with? "test"
+      # Find python executable
+      py = `which python3`.size.positive? ? "python3" : "python"
       # Execute quick tests
-      system "./tests/runtests.py built-in fast 2>&1 | tee make-check.log"
+      system "#{py} ./tests/runtests.py built-in fast 2>&1 >make-check.log"
       ohai `grep ", succeeded:" "make-check.log"`.chomp
       prefix.install "make-check.log"
-    elsif build.with? "testsuite"
-      # Generate test database only
-      system "./tests/runtests.py 2>&1 fast[00] >/dev/null"
     end
 
     system "make", "install"
 
     if build.with? "testsuite"
+      # Find python executable
+      py = `which python3`.size.positive? ? "python3" : "python"
+      # Generate test database
+      system "#{py} ./tests/runtests.py fast[00] 2>&1 >/dev/null"
       # Create a wrapper to runtests.py script
       test_path = share/"abinit-test"
       test_file = File.new("abinit-runtests", "w")
@@ -138,7 +130,7 @@ class Abinit8 < Formula
       test_file.puts "SHAREDIR=\`brew --cellar\`\"/#{name}/#{ver}/share\""
       test_file.puts "TESTDIR=${SHAREDIR}\"/abinit-test\""
       test_file.puts "if [ -w \"${TESTDIR}/test_suite.cpkl\" ];then"
-      test_file.puts " PYTHONPATH=${SHAREDIR}\":\"${PYTHONPATH} ${TESTDIR}\"/runtests.py\" -b\"${TESTDIR}\" $@"
+      test_file.puts " PYTHONPATH=${SHAREDIR}\":\"${PYTHONPATH} #{py} ${TESTDIR}\"/runtests.py\" -b\"${TESTDIR}\" $@"
       test_file.puts "else"
       test_file.puts " echo \"You dont have write access to \"${TESTDIR}\"! use sudo?\""
       test_file.puts "fi"
@@ -184,7 +176,7 @@ index 2eb330b..f5aade1 100644
 --- a/src/78_effpot/m_polynomial_coeff.F90
 +++ b/src/78_effpot/m_polynomial_coeff.F90
 @@ -2502,8 +2502,8 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
- 
+
  !Arguments ---------------------------------------------
  !scalar
 - integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max,ncoeff_out,nsym,nrpt,nstr
@@ -202,11 +194,11 @@ index 2eb330b..f5aade1 100644
 +     if(power_disp==1) then
 +       if(icoeff1 <= ncoeff .and. compatibleCoeffs(icoeff1,icoeff1)==0) cycle
 +     end if
- 
+
       if(compatibleCoeffs(icoeff,icoeff1)==0) cycle
 
 @@ -2757,9 +2757,9 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
- 
+
  !Arguments ---------------------------------------------
  !scalar
 - integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max
@@ -218,7 +210,7 @@ index 2eb330b..f5aade1 100644
   integer,optional,intent(in) :: nbody
   logical,optional,intent(in) :: only_odd_power,only_even_power
 @@ -2807,16 +2807,15 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
- 
+
  !    If the power_disp is one, we need to set icoeff to icoeff1
       if(power_disp==1) then
 -       icoeff = icoeff1
@@ -236,5 +228,5 @@ index 2eb330b..f5aade1 100644
 +        if(compatibleCoeffs(index_coeff(icoeff2),icoeff1)==0) compatible=.FALSE.
 +      endif
      end do
- 
+
       if (.not.compatible) cycle !The distance is not compatible

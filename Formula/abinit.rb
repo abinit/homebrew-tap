@@ -4,16 +4,16 @@ class Abinit < Formula
   url "https://www.abinit.org/sites/default/files/packages/abinit-9.6.2.tar.gz"
   sha256 "b018c2ff24338a5952c5550a7e09d4c7793b62402c7aa4e09273e9a666e674fb"
   license "GPL-3.0-only"
+  revision 1
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any,                 arm64_big_sur: "104274223167d03251ed77fe2da660e9065187d8a0dc25621fef0a47a4abc4d1"
-    sha256 cellar: :any,                 monterey:      "eb026d76e6ef9bbe6334d34f6edbdece3d69f4043788a789bac050a238a6bd08"
-    sha256 cellar: :any,                 big_sur:       "39afd912d05321ae991b05891332364ba79dc26dbd0d35cbfa125f395e0fcb23"
-    sha256 cellar: :any,                 catalina:      "21bfcdc31a077849d0e94e80b5a7aeebcfa8b658f890b248854042239357e59a"
-    sha256 cellar: :any,                 mojave:        "4809ac39b2220b125a875bb32a61150a00ca4eec78571e110e0956bcfeb63e43"
-    sha256 cellar: :any,                 high_sierra:   "368609c7afcaef22d6d32de21f769a2fc331c7a898bb7b89b2ded8eb574e9883"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "132934a25ca8b7c15c9fbb9d0fdb4ecd95bc7f2046e1d8f51cda018db92842e9"
+    # sha256 cellar: :any, arm64_big_sur: ""
+    sha256 cellar: :any, monterey: "4653470fb09c84c6dcb3dfb4d9b3e3420a13143513d1a740e970f3aa120da042"
+    sha256 cellar: :any, big_sur:  "104d9c81e034a07652c7776295e41b3b8896ae65c770b0020211d97812cf6df2"
+    sha256 cellar: :any, catalina: "01a8feef2a647e6e7cec205e53126943a6f192297cd86207ef3673ed2f954141"
+    sha256 cellar: :any, mojave: "6e0315cca6ba01c94dd8b3b08823687aed1f8686f8d05bb528e03d6b9bd32fef"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "007ba5962207a147daa6881f8acad6f28771f5170e5f4fcf25eaf0a5aeb2dfc0"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -22,23 +22,22 @@ class Abinit < Formula
 
   depends_on "gcc"
   depends_on "libxc"
-  depends_on "netcdf" #Should be suppressed as dependence of netcdf-fortran
   depends_on "netcdf-fortran"
   depends_on "open-mpi"
-  # We should replace veclibfort and lapack by openblas when scalapack is in use!
-  #   Just because scalapack depends on it
-  if OS.mac?
-    depends_on "veclibfort"
-  else
-    depends_on "lapack"
-  end
+  depends_on "openblas"
   depends_on "fftw" => :recommended
-  depends_on "hdf5-parallel" => :recommended
   depends_on "libxml2" => :recommended
   depends_on "scalapack" => :recommended
   depends_on "wannier90" => :recommended
+  depends_on "netcdf-fortran-parallel" => :optional
 
   conflicts_with "abinit8", because: "abinit 9 and abinit 8 share the same executables"
+
+  # From libxc5 to libXC6 (to be suppressed for 9.8+)
+  patch do
+    url "https://github.com/abinit/homebrew-tap/raw/master/Formula/libxc_5to6_patch.diff"
+    sha256 "31b270eef51ddfd77b8a7169d993592dc4a73c4273699847ca49cf3fe58dd940"
+  end
 
   def install
     ENV.delete "CC"
@@ -52,18 +51,24 @@ class Abinit < Formula
       FC=mpif90
     ]
     # Workaround to compile Abinit 9.0.4 with gcc10+
-    compilers << "FCFLAGS_EXTRA=-fallow-argument-mismatch"
+    compilers << "FCFLAGS_EXTRA=-fallow-argument-mismatch -Wno-missing-include-dirs"
 
     args = %W[
       --prefix=#{prefix}
       --with-mpi=yes
       --enable-mpi-inplace=yes
       --with-optim-flavor=standard
-      --with-netcdf=#{Formula["netcdf"].opt_prefix}
-      --with-netcdf-fortran=#{Formula["netcdf"].opt_prefix}
-      --with-libxc=#{Formula["libxc"].opt_prefix}
       --enable-zdot-bugfix=yes
+      --with-libxc=#{Formula["libxc"].opt_prefix}
     ]
+
+    if build.with? "netcdf-fortran-parallel"
+      args << "--with-netcdf=#{Formula["netcdf-parallel"].opt_prefix}"
+      args << "--with-netcdf-fortran=#{Formula["netcdf-fortran-parallel"].opt_prefix}"
+    else
+      args << "--with-netcdf=#{Formula["netcdf"].opt_prefix}"
+      args << "--with-netcdf-fortran=#{Formula["netcdf-fortran"].opt_prefix}"
+    end
 
     libs = %w[]
 
@@ -71,20 +76,11 @@ class Abinit < Formula
 
     if build.with? "scalapack"
       args << "--with-linalg-flavor=netlib"
-      libs << if OS.mac?
-        "LINALG_LIBS=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort " \
-          "-L#{Formula["scalapack"].opt_lib} -lscalapack"
-      else
-        "LINALG_LIBS=-L#{Formula["lapack"].opt_lib} -lblas -llapack " \
-          "-L#{Formula["scalapack"].opt_lib} -lscalapack"
-      end
+      libs << "LINALG_LIBS=-L#{Formula["openblas"].opt_lib} -lopenblas " \
+              "-L#{Formula["scalapack"].opt_lib} -lscalapack"
     else
       args << "--with-linalg-flavor=none"
-      libs << if OS.mac?
-        "LINALG_LIBS=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
-      else
-        "LINALG_LIBS=-L#{Formula["lapack"].opt_lib} -lblas -llapack"
-      end
+      libs << "LINALG_LIBS=-L#{Formula["openblas"].opt_lib} -lopenblas"
     end
 
     if build.with? "fftw"
@@ -97,36 +93,30 @@ class Abinit < Formula
     end
 
     args << "--with-libxml2=#{Formula["libxml2"].opt_prefix}" if build.with? "libxml2"
-    args << "--with-hdf5=#{Formula["hdf5-parallel"].opt_prefix}" if build.with? "hdf5-parallel"
+    args << "--with-hdf5=#{Formula["hdf5-mpi"].opt_prefix}" if build.with? "hdf5-mpi"
     args << "--with-wannier90=#{Formula["wannier90"].opt_prefix}" if build.with? "wannier90"
 
     system "./configure", *args, *libs, *compilers
     system "make"
 
     if build.with? "test"
+      # Find python executable
+      py = `which python3`.size.positive? ? "python3" : "python"
       # Execute quick tests
-      if OS.mac?
-        system "./tests/runtests.py built-in fast &> make-check.log"
-        system "grep", "-A2", "Suite", "make-check.log"
-      else
-        python_exe = `which python3`.size.positive? ? "python3" : "python"
-        system "#{python_exe} ./tests/runtests.py built-in fast &> make-check.log"
-      end
+      system "#{py} ./tests/runtests.py built-in fast 2>&1 >make-check.log"
+      system "grep", "-A2", "Suite", "make-check.log"
       ohai `grep ", succeeded:" "make-check.log"`.chomp
       prefix.install "make-check.log"
-    elsif build.with? "testsuite"
-      # Generate test database only
-      if OS.mac?
-        system "./tests/runtests.py fast[00] &> /dev/null"
-      else
-        python_exe = `which python3`.size.positive? ? "python3" : "python"
-        system "#{python_exe} ./tests/runtests.py fast[00] &> make-check.log"
-      end
     end
 
     system "make", "install"
 
     if build.with? "testsuite"
+      # Find python executable
+      py = `which python3`.size.positive? ? "python3" : "python"
+      # Generate test database
+      system "#{py} ./tests/runtests.py fast[00] 2>&1 >/dev/null"
+      # Test paths
       test_path = share/"tests"
       test_dir = Pathname.new(test_path.to_s)
       # Copy tests directory
@@ -152,7 +142,7 @@ class Abinit < Formula
       test_file.puts "SHAREDIR=\`brew --cellar\`\"/#{name}/#{ver}/share\""
       test_file.puts "TESTDIR=${SHAREDIR}\"/tests\""
       test_file.puts "if [ -w \"${TESTDIR}/test_suite.cpkl\" ];then"
-      test_file.puts " PYTHONPATH=${SHAREDIR}\":\"${PYTHONPATH} ${TESTDIR}\"/runtests.py\" -b\"${TESTDIR}\" $@"
+      test_file.puts " PYTHONPATH=${SHAREDIR}\":\"${PYTHONPATH} #{py} ${TESTDIR}\"/runtests.py\" -b\"${TESTDIR}\" $@"
       test_file.puts "else"
       test_file.puts " echo \"You dont have write access to \"${TESTDIR}\"! use sudo?\""
       test_file.puts "fi"

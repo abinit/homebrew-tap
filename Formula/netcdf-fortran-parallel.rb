@@ -9,9 +9,9 @@ class NetcdfFortranParallel < Formula
   bottle do
     root_url "http://forge.abinit.org/homebrew"
     sha256 cellar: :any, monterey: "2c1c9dbc0c4ad5dffbf0115333fa24eacc2aba0f9e94da1c728048f7cf25a857"
-    sha256 cellar: :any, big_sur:  "7cc9397e430794a40b123a3e3e06725959bc2a1476dccb1564ed31f97722ccda"
-    sha256 cellar: :any, catalina: "51570e22d4c9b2a2cdd88980d7d1371a5a273959675cf09460e9d2e304814a84zaa"
-    sha256 cellar: :any, mojave:   "04bd56a9fd1885b7232a53205a60a63ba0510e3e9631e59afca4e8e810928234"
+    sha256 cellar: :any, big_sur: "7cc9397e430794a40b123a3e3e06725959bc2a1476dccb1564ed31f97722ccda"
+    sha256 cellar: :any, catalina: "51570e22d4c9b2a2cdd88980d7d1371a5a273959675cf09460e9d2e304814a84"
+    sha256 cellar: :any, mojave: "04bd56a9fd1885b7232a53205a60a63ba0510e3e9631e59afca4e8e810928234"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "3976552b903a1bdfb5fbb8c334eabee7f224c6e86aa234ee1a31df47113110dc"
   end
 
@@ -30,7 +30,8 @@ class NetcdfFortranParallel < Formula
     ENV["OMPI_FC"] = "gfortran"
     ENV["FC"] = "mpifort"
 
-    args = std_cmake_args + %w[-DBUILD_TESTING=OFF -DENABLE_TESTS=OFF -DENABLE_NETCDF_4=ON -DENABLE_PARALLEL4=ON -DENABLE_DOXYGEN=OFF]
+    args = std_cmake_args + %w[-DBUILD_TESTING=OFF -DENABLE_TESTS=OFF -DENABLE_NETCDF_4=ON
+                               -DENABLE_PARALLEL4=ON -DENABLE_DOXYGEN=OFF]
 
     system "cmake", "-S", ".", "-B", "build_shared", *args, "-DBUILD_SHARED_LIBS=ON"
     system "cmake", "--build", "build_shared"
@@ -41,7 +42,7 @@ class NetcdfFortranParallel < Formula
     lib.install "build_static/fortran/libnetcdff.a"
 
     # Remove shim paths
-    #inreplace [bin/"nf-config", lib/"libnetcdff.settings", lib/"pkgconfig/netcdf-fortran.pc"],
+    # inreplace [bin/"nf-config", lib/"libnetcdff.settings", lib/"pkgconfig/netcdf-fortran.pc"],
     #  Superenv.shims_path/ENV.cc, ENV.cc
   end
 
