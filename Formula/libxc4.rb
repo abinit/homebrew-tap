@@ -7,6 +7,9 @@ class Libxc4 < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
+    sha256 cellar: :any, arm64_ventura: "3ba3e9886eba197f119763b11387370c67d7cf9c7b8d8f8c54cfa46446ebd88f"
+    sha256 cellar: :any, arm64_monterey: "d2e68d5c5119baac343b7691403586cfdd879ee821932717ce069b9fa75f1d4d"
+    sha256 cellar: :any, ventura: "95e62b491ac8dbc1723c059bf302f20210fd5416c172e181a1abbb71bd166185"
     sha256 cellar: :any, monterey: "13a88c809e6182dc146e897fabd526df32a49359ce43f945c5c29b127e9b4150"
     sha256 cellar: :any, big_sur:  "18e48b10cff3d12ec9f8fc0a489944a7905e7cc2d41166e299cf4870aa579aff"
     sha256 cellar: :any, catalina: "48586ad13671559dc8631445dca16ea147602dd51c03d2536413abceb927a3fa"

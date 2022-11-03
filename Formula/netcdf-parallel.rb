@@ -8,6 +8,9 @@ class NetcdfParallel < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
+    sha256 cellar: :any, arm64_ventura: "b00501ff3264a42e0d78c4d44ade3f9622db386d82b8309fe413b111bf139b22"
+    sha256 cellar: :any, arm64_monterey: "08d74c05f9cfc6d16c83d38a4b4e876b4d6f9ea3e59749191240d27a1bcc054f"
+    sha256 cellar: :any, ventura: "803299f0eeebb3266a7a61cbea129fa334a5c020cb1e21a6396822716a3f7de1"
     sha256 cellar: :any, monterey: "4abdfdaba729e964cd5b03cca50e1c6a2e65fcd227fdcc4ae4c9af017eeb9f5e"
     sha256 cellar: :any, big_sur:  "a81d741c8fdc3d1e87c14e66fc4abf60c7062a7fd2f35757fa4e0508eb9b6664"
     sha256 cellar: :any, catalina: "fde7b705aad243a43d27adc52f0184676bf4c27fb87e699af0f0a24121f441a4"

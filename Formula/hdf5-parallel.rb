@@ -9,6 +9,9 @@ class Hdf5Parallel < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
+    sha256 cellar: :any, arm64_ventura: "a4c8a58ae2336818799a532ae7fd7cdf1783d6efde6154eeb7907af680d9d49f"
+    sha256 cellar: :any, arm64_monterey: "801e67934155929556676d2c266f6b5887f4e2cef5c975656e84e0837b246339"
+    sha256 cellar: :any, ventura: "5a508f1f8534141c8dcd4ccb668094985667874195c6be5aac3aae031b9ad7de"
     sha256 cellar: :any, monterey: "b54fec7c1b12cb1a449af68c5fc7190254ef61053993fae56e6ce95da66581cc"
     sha256 cellar: :any, big_sur:  "33ce529817dfbd178125a324d7a066ac5016c7fddfc2eed5b4ac6f72b16d574c"
     sha256 cellar: :any, catalina: "bb5a041cdfb4e0488536ec259e3aeed03c17393804c7876b4eaa5b3ad4626f67"
