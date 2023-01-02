@@ -8,7 +8,7 @@ class Abinit8 < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sh# a256 cellar: :any, arm64_ventura: "a6c40ab2ea41ef5fb85848e3f9fbd310d764f72e3703806e5ca5922413ce058e"
+    sha256 cellar: :any, arm64_ventura: "a6c40ab2ea41ef5fb85848e3f9fbd310d764f72e3703806e5ca5922413ce058e"
     sha256 cellar: :any, arm64_monterey: "ba5a9fcddc428305757193d82e5d886047d3656c0b2f6f11e89a89ab61abd1b2"
     sha256 cellar: :any, ventura: "4e41d9883ab6dc89e2fe2b6fb6a51c7dd1e06f3cee9b2b8a102b643edfd5ee83"
     sha256 cellar: :any, monterey: "e9fe271a032abcb585fcf784ed42fc077750592af78d633da5b0629127daf326"
