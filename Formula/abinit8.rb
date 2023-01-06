@@ -4,18 +4,18 @@ class Abinit8 < Formula
   url "https://www.abinit.org/sites/default/files/packages/abinit-8.10.3.tar.gz"
   sha256 "ed626424b4472b93256622fbb9c7645fa3ffb693d4b444b07d488771ea7eaa75"
   license "GPL-3.0-only"
-  revision 2
+  revision 3
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "a6c40ab2ea41ef5fb85848e3f9fbd310d764f72e3703806e5ca5922413ce058e"
-    sha256 cellar: :any, arm64_monterey: "ba5a9fcddc428305757193d82e5d886047d3656c0b2f6f11e89a89ab61abd1b2"
-    sha256 cellar: :any, ventura: "4e41d9883ab6dc89e2fe2b6fb6a51c7dd1e06f3cee9b2b8a102b643edfd5ee83"
-    sha256 cellar: :any, monterey: "e9fe271a032abcb585fcf784ed42fc077750592af78d633da5b0629127daf326"
-    sha256 cellar: :any, big_sur:  "9882511ab63c4d21e7806eaa48855450c41709c138df7ab6ad882d04dcf4ff98"
-    sha256 cellar: :any, catalina: "ba010064a556c52e2b3e863f9aea6c757f5394de75b09ea76c01614092a77a04"
-    sha256 cellar: :any, mojave: "f4e1d29df70c14ef30399ea07ad2a0eb004859567a774cc6d3defaf63d2d866f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "5fa637484095904bfd29ee748fdfb02e832bf42ce6d1688b83cffbcc9c6ece38"
+    sha256 cellar: :any, arm64_ventura: "7b82270b30976d55939e97a67888b523bd4d32521a4f23a1adfc2277aa7da8be"
+    sha256 cellar: :any, arm64_monterey: "f52725ac320d618880843271a1d30f6db8bd9e54dbd9f88d7c7b587b4d5091bc"
+    sha256 cellar: :any, ventura: "2d44f8c3dc20db5d94779b0919557aaf4d553e9a4a27cdee1569ef41c1cfd2c1"
+    sha256 cellar: :any, monterey: "1fc3c0b871020b8d7982977aa11b7e10fb1e5fcaf4e36c8afe3f0ed75bc1cfde"
+    sha256 cellar: :any, big_sur: "84c026a5fc7f7e284481654c624c6fddb6c8f8982a499f7bce8c671b64107b39"
+    sha256 cellar: :any, catalina: "35771bd427c41eb8cdd73e3872f3429352c1ecdb9f0c43fcacad34af64b2d4dd"
+    sha256 cellar: :any, mojave: "7a77340653024831a1bf94937ebd82e4c9e233920b74dcc3b9ef66282721fdb8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "f32c8ea7d708aff5e22afbdcb061201f9b1e89dbda11bca1b01d0bfdac233e11"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -114,6 +114,7 @@ class Abinit8 < Formula
     if build.with? "test"
       # Find python executable
       py = `which python3`.size.positive? ? "python3" : "python"
+      py.prepend "OMP_NUM_THREADS=1 " if OS.linux? && build.with?("openmp")
       # Execute quick tests
       system "#{py} ./tests/runtests.py built-in fast 2>&1 >make-check.log"
       ohai `grep ", succeeded:" "make-check.log"`.chomp
@@ -125,14 +126,15 @@ class Abinit8 < Formula
     if build.with? "testsuite"
       # Find python executable
       py = `which python3`.size.positive? ? "python3" : "python"
-      # Generate test database
+      py.prepend "OMP_NUM_THREADS=1 " if OS.linux? && build.with?("openmp")
+       # Generate test database
       system "#{py} ./tests/runtests.py fast[00] 2>&1 >/dev/null"
       # Create a wrapper to runtests.py script
       test_path = share/"abinit-test"
       test_file = File.new("abinit-runtests", "w")
       test_file.puts "#!/bin/sh"
       ver = revision.zero? ? version.to_s : "#{version}_#{revision}"
-      test_file.puts "SHAREDIR=\`brew --cellar\`\"/#{name}/#{ver}/share\""
+      test_file.puts "SHAREDIR=`brew --cellar`\"/#{name}/#{ver}/share\""
       test_file.puts "TESTDIR=${SHAREDIR}\"/abinit-test\""
       test_file.puts "if [ -w \"${TESTDIR}/test_suite.cpkl\" ];then"
       test_file.puts " PYTHONPATH=${SHAREDIR}\":\"${PYTHONPATH} #{py} ${TESTDIR}\"/runtests.py\" -b\"${TESTDIR}\" $@"
@@ -156,21 +158,34 @@ class Abinit8 < Formula
     end
   end
 
+  def caveats
+    unless build.with?("testsuite")
+      <<~EOS
+        ABINIT8 test suite is not available because it
+        has not been activated at the installation stage.
+        Action: install with 'brew install abinit --with-testsuite'.
+
+      EOS
+    end
+    if OS.linux? && build.with?("openmp")
+      <<~EOS
+        Note: if, running ABINIT8 without MPI, you experience
+        a 'ompi_mpi_init' error, try setting:
+        OMP_NUM_THREADS=1
+      EOS
+    end
+  end
+
   test do
     system "#{bin}/abinit", "-b"
     if build.with? "testsuite"
       system "#{bin}/abinit-runtests", "--help"
       puts
-      puts "The entire ABINIT test suite is available"
+      puts "The entire ABINIT8 test suite is available"
       puts "thanks to the 'abinit-runtests' script."
       puts "Type 'abinit-runtests --help' to learn more."
       puts "Note that you need write access to #{share}/abinit-test"
       puts "and that some libXC tests (based on libXC v3) will failed."
-    else
-      puts
-      puts "ABINIT test suite is not available because it"
-      puts "has not been activated at the installation stage."
-      puts "Action: install with 'brew install abinit --with-testsuite'."
     end
   end
 end

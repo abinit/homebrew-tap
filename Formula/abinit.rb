@@ -1,21 +1,20 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-9.6.2.tar.gz"
-  sha256 "b018c2ff24338a5952c5550a7e09d4c7793b62402c7aa4e09273e9a666e674fb"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-9.8.1.tar.gz"
+  sha256 "3f299077df71f88fc9348ab48def9fccee912e80b4d6b0d4ee9a6825af933a91"
   license "GPL-3.0-only"
-  revision 1
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "425d45b2b75c1adc0297dbf81b2320ec892aaeb59368e7520106e8df3aca8874"
-    sha256 cellar: :any, arm64_monterey: "0a2b36680348c83154f3324088c54ea8ec1a160a5b39071be771be56f143d6ad"
-    sha256 cellar: :any, ventura: "4af42a7e8e0d8f270f7d54f60360160f61266bf56e0c7f5d36184cb624f7dda4"
-    sha256 cellar: :any, monterey: "4653470fb09c84c6dcb3dfb4d9b3e3420a13143513d1a740e970f3aa120da042"
-    sha256 cellar: :any, big_sur:  "104d9c81e034a07652c7776295e41b3b8896ae65c770b0020211d97812cf6df2"
-    sha256 cellar: :any, catalina: "01a8feef2a647e6e7cec205e53126943a6f192297cd86207ef3673ed2f954141"
-    sha256 cellar: :any, mojave: "6e0315cca6ba01c94dd8b3b08823687aed1f8686f8d05bb528e03d6b9bd32fef"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "007ba5962207a147daa6881f8acad6f28771f5170e5f4fcf25eaf0a5aeb2dfc0"
+    sha256 cellar: :any, arm64_ventura: "646efca30d9686a7af0dd0575ec1a4fcd18b37a13c9dd99847a9509c846cf629"
+    sha256 cellar: :any, arm64_monterey: "d9c432037e941d26b6464aed0e0c0dc27385cf81179dd46e201df550a535f2a2"
+    sha256 cellar: :any, ventura: "6ab47ec0e13e9a1476424b55c7c436fba871c14ceca930292966fb6be6367a9c"
+    sha256 cellar: :any, monterey: "cec22e5a18d687e05d3ec4aa283358f0e91c8917c2318e769da790fdf059b644"
+    sha256 cellar: :any, big_sur: "d6aeec24437db7f8200035186d523655398166d8a1571085b89f7be0282930b4"
+    sha256 cellar: :any, catalina: "e942d9bc319a241a62f357c9da606c0a4090bc5e1e4976035d3f6f42e3995310"
+    sha256 cellar: :any, mojave: "6e74c2435838180c505923c26ff3ba839562cc44a4cb3c77bb9b7518eb097a3c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "04f395d55747e5987c5334b9ff7d1a3f7f833ef83677db2bd192d79caf31cde4"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -34,12 +33,6 @@ class Abinit < Formula
   depends_on "netcdf-fortran-parallel" => :optional
 
   conflicts_with "abinit8", because: "abinit 9 and abinit 8 share the same executables"
-
-  # From libxc5 to libXC6 (to be suppressed for 9.8+)
-  patch do
-    url "https://github.com/abinit/homebrew-tap/raw/master/Formula/libxc_5to6_patch.diff"
-    sha256 "31b270eef51ddfd77b8a7169d993592dc4a73c4273699847ca49cf3fe58dd940"
-  end
 
   def install
     ENV.delete "CC"
@@ -104,6 +97,7 @@ class Abinit < Formula
     if build.with? "test"
       # Find python executable
       py = `which python3`.size.positive? ? "python3" : "python"
+      py.prepend "OMP_NUM_THREADS=1 " if OS.linux? && build.with?("openmp")
       # Execute quick tests
       system "#{py} ./tests/runtests.py built-in fast 2>&1 >make-check.log"
       system "grep", "-A2", "Suite", "make-check.log"
@@ -116,6 +110,7 @@ class Abinit < Formula
     if build.with? "testsuite"
       # Find python executable
       py = `which python3`.size.positive? ? "python3" : "python"
+      py.prepend "OMP_NUM_THREADS=1 " if OS.linux? && build.with?("openmp")
       # Generate test database
       system "#{py} ./tests/runtests.py fast[00] 2>&1 >/dev/null"
       # Test paths
@@ -141,7 +136,7 @@ class Abinit < Formula
       test_file = File.new("abinit-runtests", "w")
       test_file.puts "#!/bin/sh"
       ver = revision.zero? ? version.to_s : "#{version}_#{revision}"
-      test_file.puts "SHAREDIR=\`brew --cellar\`\"/#{name}/#{ver}/share\""
+      test_file.puts "SHAREDIR=`brew --cellar`\"/#{name}/#{ver}/share\""
       test_file.puts "TESTDIR=${SHAREDIR}\"/tests\""
       test_file.puts "if [ -w \"${TESTDIR}/test_suite.cpkl\" ];then"
       test_file.puts " PYTHONPATH=${SHAREDIR}\":\"${PYTHONPATH} #{py} ${TESTDIR}\"/runtests.py\" -b\"${TESTDIR}\" $@"
@@ -155,9 +150,27 @@ class Abinit < Formula
     end
   end
 
+  def caveats
+    unless build.with?("testsuite")
+      <<~EOS
+        ABINIT test suite is not available because it
+        has not been activated at the installation stage.
+        Action: install with 'brew install abinit --with-testsuite'.
+
+      EOS
+    end
+    if OS.linux? && build.with?("openmp")
+      <<~EOS
+        Note: if, running ABINIT without MPI, you experience
+        a 'ompi_mpi_init' error, try setting:
+        OMP_NUM_THREADS=1
+      EOS
+    end
+  end
+
   test do
     system "#{bin}/abinit", "-b"
-    if build.with? "testsuite"
+    if build.with?("testsuite")
       system "#{bin}/abinit-runtests", "--help"
       puts
       puts "The entire ABINIT test suite has been copied into:"
@@ -167,11 +180,6 @@ class Abinit < Formula
       puts "thanks to the 'abinit-runtests' script."
       puts "Type 'abinit-runtests --help' to learn more."
       puts "Note that you need write access to #{share}/tests."
-    else
-      puts
-      puts "ABINIT test suite is not available because it"
-      puts "has not been activated at the installation stage."
-      puts "Action: install with 'brew install abinit --with-testsuite'."
     end
   end
 end

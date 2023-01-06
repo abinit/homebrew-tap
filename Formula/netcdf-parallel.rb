@@ -5,17 +5,18 @@ class NetcdfParallel < Formula
   url "https://downloads.unidata.ucar.edu/netcdf-c/4.9.0/netcdf-c-4.9.0.tar.gz"
   sha256 "4c956022b79c08e5e14eee8df51b13c28e6121c2b7e7faadc21b375949400b49"
   license "BSD-3-Clause"
+  revision 1
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "b00501ff3264a42e0d78c4d44ade3f9622db386d82b8309fe413b111bf139b22"
-    sha256 cellar: :any, arm64_monterey: "08d74c05f9cfc6d16c83d38a4b4e876b4d6f9ea3e59749191240d27a1bcc054f"
-    sha256 cellar: :any, ventura: "803299f0eeebb3266a7a61cbea129fa334a5c020cb1e21a6396822716a3f7de1"
-    sha256 cellar: :any, monterey: "4abdfdaba729e964cd5b03cca50e1c6a2e65fcd227fdcc4ae4c9af017eeb9f5e"
-    sha256 cellar: :any, big_sur:  "a81d741c8fdc3d1e87c14e66fc4abf60c7062a7fd2f35757fa4e0508eb9b6664"
-    sha256 cellar: :any, catalina: "fde7b705aad243a43d27adc52f0184676bf4c27fb87e699af0f0a24121f441a4"
-    sha256 cellar: :any, mojave:   "3f9da4ce165431d8e641d953e55ffde590e8b530678f02fafd098a0efc5ebb6c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "0abbec9b071718943fdbb07f75bbb94d62387c9df6f24bf41c2e702955c93615"
+    sha256 cellar: :any, arm64_ventura: "e0bee312197fcde04755a6f0408f74f934d7056c33457eda18f3c8dec7183f99"
+    sha256 cellar: :any, arm64_monterey: "e64e1c4ed569069aa9d1ba94cae998b59fd0474c6b0673a9a4b1ef76e2dfc5ca"
+    sha256 cellar: :any, ventura: "267ead3d9268b2d6dfae55cc7d7246ae1f8b6431e4debe84f7734d7f26a16b6b"
+    sha256 cellar: :any, monterey: "9bcabcca67e2f86f5d4b5415a3a1e4c9de45437148105f00e5df3cc05409ddf9"
+    sha256 cellar: :any, big_sur: "8169253be51992dc983cfd52a6f81a11b6d386bad039462fd685e4a7d336593d"
+    sha256 cellar: :any, catalina: "666c989aec6ede1161da2e5e13c64906307055367f97f4c5c226b0fb9f5d7e57"
+    sha256 cellar: :any, mojave: "45e7ff821d2207011d3a1b960dda7549959c22f67c1d138f43f6e50933d22e92"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "ca76cbe121d1ab50ded133b2629b93df8cb49ff3c1ea2f13a2399c1511a25fe6"
   end
 
   keg_only "conflict with serial netcdf and pnetcdf packages"
@@ -25,6 +26,7 @@ class NetcdfParallel < Formula
   depends_on "hdf5-parallel"
 
   uses_from_macos "curl"
+  uses_from_macos "libxml2"
 
   # Patch for JSON collision. Remove in 4.9.1
   patch do
@@ -33,17 +35,19 @@ class NetcdfParallel < Formula
   end
 
   def install
-    ENV["OMPI_CXX"] = ENV["CXX"]
-    ENV["CXX"] = "mpicxx"
-    ENV["OMPI_CC"] = ENV["CC"]
-    ENV["CC"] = "mpicc"
-    ENV["OMPI_FC"] = "gfortran"
-    ENV["FC"] = "mpifort"
 
     # Remove when this is resolved: https://github.com/Unidata/netcdf-c/issues/2390
     inreplace "CMakeLists.txt", "SET(netCDF_LIB_VERSION 19})", "SET(netCDF_LIB_VERSION 19)"
 
-    args = std_cmake_args + %w[-DBUILD_TESTING=OFF -DENABLE_TESTS=OFF -DENABLE_NETCDF_4=ON -DENABLE_PARALLEL4=ON -DENABLE_DOXYGEN=OFF]
+    args = std_cmake_args + %w[-DCMAKE_Fortran_COMPILER=mpifort
+                               -DCMAKE_C_COMPILER=mpicc
+                               -DCMAKE_CXX_COMPILER=mpicxx
+                               -DBUILD_TESTING=OFF
+                               -DENABLE_TESTS=OFF
+                               -DENABLE_NETCDF_4=ON
+                               -DENABLE_PARALLEL4=ON
+                               -DENABLE_DOXYGEN=OFF]
+
     # Fixes "relocation R_X86_64_PC32 against symbol `stderr@@GLIBC_2.2.5' can not be used" on Linux
     args << "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" if OS.linux?
 

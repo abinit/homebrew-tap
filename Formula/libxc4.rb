@@ -7,14 +7,14 @@ class Libxc4 < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "3ba3e9886eba197f119763b11387370c67d7cf9c7b8d8f8c54cfa46446ebd88f"
-    sha256 cellar: :any, arm64_monterey: "d2e68d5c5119baac343b7691403586cfdd879ee821932717ce069b9fa75f1d4d"
-    sha256 cellar: :any, ventura: "95e62b491ac8dbc1723c059bf302f20210fd5416c172e181a1abbb71bd166185"
-    sha256 cellar: :any, monterey: "13a88c809e6182dc146e897fabd526df32a49359ce43f945c5c29b127e9b4150"
-    sha256 cellar: :any, big_sur:  "18e48b10cff3d12ec9f8fc0a489944a7905e7cc2d41166e299cf4870aa579aff"
-    sha256 cellar: :any, catalina: "48586ad13671559dc8631445dca16ea147602dd51c03d2536413abceb927a3fa"
-    sha256 cellar: :any, mojave:   "ba417cef01d084aed667605278f4896beccbf9ba0fb6950a19f9cc31ef024c4e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "614393513c09b8d3fc1b7fdf46e8e227c798024e36846015ce61216259479f2c"
+    sha256 cellar: :any, arm64_ventura: "b135fd7a5631cb30f71971a4edec14793167d76479a3f08a7bc5a802a2747c5a"
+    sha256 cellar: :any, arm64_monterey: "cec62da62415989e7e6ee71a57276c6ec2e127b25c52f0d60581458276352cce"
+    sha256 cellar: :any, ventura: "1872d20983d0ae645f821870f45ec5dcd21415f8240112475e33965d2da2b3f9"
+    sha256 cellar: :any, monterey: "b347b43079ec6c12420c55aae121c546229ce42bc1f86b0bd2360ce18ebce0af"
+    sha256 cellar: :any, big_sur: "5e82e0be63069eeec500d0dbd4b36233415dc6cac7dd5c27cf467cbdf1c26010"
+    sha256 cellar: :any, catalina: "f07640af6787f9b008b50d31f53e3aed7022c5da4c238d1d98211c65a6adcb99"
+    sha256 cellar: :any, mojave: "fa6d3cd5bd774a52e1d76812907acc5085cc9e37a922d2495ff8b8b6942c2f79"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "74318fead619a39ee2e8017bfd4f0391a8660cd11b41babf4ee00c9abe4b3d72"
   end
 
   keg_only "conflict with official libxc library"
