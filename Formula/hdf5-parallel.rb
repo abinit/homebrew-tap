@@ -5,18 +5,19 @@ class Hdf5Parallel < Formula
   url "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/src/hdf5-1.12.2.tar.bz2"
   sha256 "1a88bbe36213a2cea0c8397201a459643e7155c9dc91e062675b3fb07ee38afe"
   license "BSD-3-Clause"
+  revision 1
   version_scheme 1
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "a4c8a58ae2336818799a532ae7fd7cdf1783d6efde6154eeb7907af680d9d49f"
-    sha256 cellar: :any, arm64_monterey: "801e67934155929556676d2c266f6b5887f4e2cef5c975656e84e0837b246339"
-    sha256 cellar: :any, ventura: "5a508f1f8534141c8dcd4ccb668094985667874195c6be5aac3aae031b9ad7de"
-    sha256 cellar: :any, monterey: "b54fec7c1b12cb1a449af68c5fc7190254ef61053993fae56e6ce95da66581cc"
-    sha256 cellar: :any, big_sur:  "33ce529817dfbd178125a324d7a066ac5016c7fddfc2eed5b4ac6f72b16d574c"
-    sha256 cellar: :any, catalina: "bb5a041cdfb4e0488536ec259e3aeed03c17393804c7876b4eaa5b3ad4626f67"
-    sha256 cellar: :any, mojave:   "95c13dd0f16d23b355965aa4cecced52c87a130f592c93748f352af254562b9c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "af952c5f0e5517f32ecdb120254d1c2cb06b696da5e15a39b60a0ec37543f119"
+    sha256 cellar: :any, arm64_ventura: "4d27d6d83d44e2cbfe02876f2f8181c704db30e57192fe8f2d6e6d0009789da8"
+    sha256 cellar: :any, arm64_monterey: "f808f924fe69d94380c9f871ff98db83a8dfa56d07c19d8f0ff1b74c9595a921"
+    sha256 cellar: :any, ventura: "0d5144fb1e19ae7907fb99ee5a70e412eb412e769e6a91656ebc451a061c2134"
+    sha256 cellar: :any, monterey: "b043dfe2090b9781c026ef20c7a75e5e5d5a1cc6c6ede471c2bf75329c7c9855"
+    sha256 cellar: :any, big_sur: "a37cf1abbf372af6ddc719e0ff997202c26d2a5a12944390287d33df0e82eea6"
+    sha256 cellar: :any, catalina: "183ebc7ac14aa5a5cbd1883eb31d25a67ad374f99206d1f94f4e0c8bf5ceb76b"
+    sha256 cellar: :any, mojave: "88ff6ff213079b907f2f991f8837ef76b35102ee2caf5ce9b3df200728237fa7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "664d602a721289bb3ddf43169631c28ddb262c3290e5029f5554d71f4aca5810"
   end
 
   keg_only "conflict with serial hdf5 and hdf5-mpi packages"
@@ -31,13 +32,6 @@ class Hdf5Parallel < Formula
   uses_from_macos "zlib"
 
   def install
-    ENV["OMPI_CXX"] = ENV["CXX"]
-    ENV["CXX"] = "mpicxx"
-    ENV["OMPI_CC"] = ENV["CC"]
-    ENV["CC"] = "mpicc"
-    ENV["OMPI_FC"] = "gfortran"
-    ENV["FC"] = "mpifort"
-
     inreplace %w[c++/src/h5c++.in fortran/src/h5fc.in bin/h5cc.in],
               "${libdir}/libhdf5.settings",
               "#{pkgshare}/libhdf5.settings"
@@ -46,27 +40,29 @@ class Hdf5Parallel < Formula
               "settingsdir=$(libdir)",
               "settingsdir=#{pkgshare}"
 
-    system "autoreconf", "--force", "--install", "--verbose"
+    if OS.mac?
+      system "autoreconf", "--force", "--install", "--verbose"
+    else
+      system "./autogen.sh"
+    end
 
     args = %W[
       --disable-dependency-tracking
       --disable-silent-rules
       --enable-build-mode=production
       --enable-fortran
-      --enable-cxx
-      --enable-unsupported
       --enable-parallel
       --prefix=#{prefix}
       --with-szlib=#{Formula["libaec"].opt_prefix}
+      CC=mpicc
+      CXX=mpic++
+      FC=mpifort
+      F77=mpif77
+      F90=mpif90
     ]
     args << "--with-zlib=#{Formula["zlib"].opt_prefix}" if OS.linux?
 
     system "./configure", *args
-
-    # Avoid shims in settings file
-    # inreplace "src/libhdf5.settings", Superenv.shims_path/ENV.cxx, ENV.cxx
-    # inreplace "src/libhdf5.settings", Superenv.shims_path/ENV.cc, ENV.cc
-
     system "make", "install"
   end
 
@@ -80,7 +76,7 @@ class Hdf5Parallel < Formula
         return 0;
       }
     EOS
-    system "#{bin}/h5cc", "test.c"
+    system "#{bin}/h5pcc", "test.c"
     assert_equal version.to_s, shell_output("./a.out").chomp
 
     (testpath/"test.f90").write <<~EOS
@@ -88,6 +84,7 @@ class Hdf5Parallel < Formula
       integer(hid_t) :: f, dspace, dset
       integer(hsize_t), dimension(2) :: dims = [2, 2]
       integer :: error = 0, major, minor, rel
+
       call h5open_f (error)
       if (error /= 0) call abort
       call h5fcreate_f ("test.h5", H5F_ACC_TRUNC_F, f, error)
@@ -109,7 +106,7 @@ class Hdf5Parallel < Formula
       write (*,"(I0,'.',I0,'.',I0)") major, minor, rel
       end
     EOS
-    system "#{bin}/h5fc", "test.f90"
+    system "#{bin}/h5pfc", "test.f90"
     assert_equal version.to_s, shell_output("./a.out").chomp
   end
 end
