@@ -1,20 +1,20 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-9.8.1.tar.gz"
-  sha256 "3f299077df71f88fc9348ab48def9fccee912e80b4d6b0d4ee9a6825af933a91"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-9.8.2.tar.gz"
+  sha256 "63be31cc8e9cb99e4b2d82be15c37e7a36512437d17c7d37f44042d6fec7c9bc"
   license "GPL-3.0-only"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "646efca30d9686a7af0dd0575ec1a4fcd18b37a13c9dd99847a9509c846cf629"
-    sha256 cellar: :any, arm64_monterey: "d9c432037e941d26b6464aed0e0c0dc27385cf81179dd46e201df550a535f2a2"
-    sha256 cellar: :any, ventura: "6ab47ec0e13e9a1476424b55c7c436fba871c14ceca930292966fb6be6367a9c"
-    sha256 cellar: :any, monterey: "cec22e5a18d687e05d3ec4aa283358f0e91c8917c2318e769da790fdf059b644"
-    sha256 cellar: :any, big_sur: "d6aeec24437db7f8200035186d523655398166d8a1571085b89f7be0282930b4"
-    sha256 cellar: :any, catalina: "e942d9bc319a241a62f357c9da606c0a4090bc5e1e4976035d3f6f42e3995310"
-    sha256 cellar: :any, mojave: "6e74c2435838180c505923c26ff3ba839562cc44a4cb3c77bb9b7518eb097a3c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "04f395d55747e5987c5334b9ff7d1a3f7f833ef83677db2bd192d79caf31cde4"
+    sha256 cellar: :any, arm64_ventura: "60524727a7e9a310812859b3b42d9360860a0a7da36818d2641456a6085e74d8"
+    sha256 cellar: :any, arm64_monterey: "3f8a20f9a249b141cdcc5a2cd467491e177cfd12d24be34de937e83951074f90"
+    sha256 cellar: :any, ventura: "b7f9bcaaa03e834f7f226ba650a5604a26311e0fadd3d1b422e502cafbe3910f"
+    sha256 cellar: :any, monterey: "6b3991cdb9e8fbbd4ecd01b2e403dbf7dcb54f6052a44a927a9ae9dee95d9871"
+    sha256 cellar: :any, big_sur: "e2d61e7cc5c8d8efeddc0f6da413221df97a123b07dbd15656cb9492526e9f98"
+    sha256 cellar: :any, catalina: "6126d6b3b6d2ac12f2e5442ba40a28674b98108c3c14d3f8b0a5d96f9572c611"
+    sha256 cellar: :any, mojave: "ad1c4521b1256982bdf853fa75d7c158a7ee4ae56fcb92ace88e11c7d9753cbe"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "b299ced09130cc46a3850607e0a461a9c1e917d8c1b35c4f7477f7159f9b36a6"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -45,7 +45,7 @@ class Abinit < Formula
       CXX=mpicxx
       FC=mpif90
     ]
-    # Workaround to compile Abinit 9.0.4 with gcc10+
+    # Workaround to compile with gcc10+
     compilers << "FCFLAGS_EXTRA=-fallow-argument-mismatch -Wno-missing-include-dirs"
 
     args = %W[
