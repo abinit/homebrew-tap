@@ -4,17 +4,17 @@ class Abinit < Formula
   url "https://www.abinit.org/sites/default/files/packages/abinit-9.8.2.tar.gz"
   sha256 "63be31cc8e9cb99e4b2d82be15c37e7a36512437d17c7d37f44042d6fec7c9bc"
   license "GPL-3.0-only"
+  revision 1
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "60524727a7e9a310812859b3b42d9360860a0a7da36818d2641456a6085e74d8"
-    sha256 cellar: :any, arm64_monterey: "3f8a20f9a249b141cdcc5a2cd467491e177cfd12d24be34de937e83951074f90"
-    sha256 cellar: :any, ventura: "b7f9bcaaa03e834f7f226ba650a5604a26311e0fadd3d1b422e502cafbe3910f"
-    sha256 cellar: :any, monterey: "6b3991cdb9e8fbbd4ecd01b2e403dbf7dcb54f6052a44a927a9ae9dee95d9871"
-    sha256 cellar: :any, big_sur: "e2d61e7cc5c8d8efeddc0f6da413221df97a123b07dbd15656cb9492526e9f98"
-    sha256 cellar: :any, catalina: "6126d6b3b6d2ac12f2e5442ba40a28674b98108c3c14d3f8b0a5d96f9572c611"
-    sha256 cellar: :any, mojave: "ad1c4521b1256982bdf853fa75d7c158a7ee4ae56fcb92ace88e11c7d9753cbe"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "b299ced09130cc46a3850607e0a461a9c1e917d8c1b35c4f7477f7159f9b36a6"
+    sha256 cellar: :any, arm64_ventura: "db26da5df2bdb749d4bad150f165dcf46f12624ae2f23145c79cbb469b5edf49"
+    sha256 cellar: :any, arm64_monterey: "1b76e1e059db45d16798d965f76b00d5fff26b6f9c6cc426d51a48473a5104be"
+    sha256 cellar: :any, ventura: "f9ca1c6c8dd81c1680999b0ff66c0c32c21507b24927f952ef7217532cafff76"
+    sha256 cellar: :any, monterey: "63eb6b663f144827ceffdd5a3fc56753946454220e780beee51b9aca6a0efaf8"
+    sha256 cellar: :any, big_sur: "f0fcf9b6967cdeaa93b40eda9d723360ae73a8a9ab2d02336232a7632ba5f46a"
+    sha256 cellar: :any, catalina: "fb4600c4495d3f7004b4d917b21722fa33b6b94eabf32c00644da50dc81eef93"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "753caa49dc219ae52eec7601a7cf01f25c573db64a56c8066104a690ac9ea615"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -33,6 +33,9 @@ class Abinit < Formula
   depends_on "netcdf-fortran-parallel" => :optional
 
   conflicts_with "abinit8", because: "abinit 9 and abinit 8 share the same executables"
+
+  # Abinit 9.8 needs to be patched with gcc13 (in m_gwls_GenerateEpsilon.F90)
+  patch :DATA
 
   def install
     ENV.delete "CC"
@@ -183,3 +186,45 @@ class Abinit < Formula
     end
   end
 end
+
+__END__
+diff --git a/src/70_gw/m_gwls_GenerateEpsilon.F90 b/src/70_gw/m_gwls_GenerateEpsilon.F90
+index 2ea0f6c..70772ed 100644
+--- a/src/70_gw/m_gwls_GenerateEpsilon.F90
++++ b/src/70_gw/m_gwls_GenerateEpsilon.F90
+@@ -156,7 +156,7 @@ end subroutine driver_generate_dielectric_matrix
+ !!
+ !! SOURCE
+ 
+-subroutine GeneratePrintDielectricEigenvalues(epsilon_matrix_function,kmax,output_filename,Lbasis,alpha,beta)
++subroutine GeneratePrintDielectricEigenvalues(epsilon_matrix_function,nseeds,kmax,output_filename,Lbasis,alpha,beta)
+ !----------------------------------------------------------------------
+ ! This routine computes the Lanczos approximate representation of the
+ ! implicit dielectic operator and then diagonalizes the banded
+@@ -173,7 +173,7 @@ interface
+   end subroutine epsilon_matrix_function
+ end interface
+ 
+-integer,       intent(in) :: kmax
++integer,       intent(in) :: nseeds,kmax
+ 
+ character(*),  intent(in) :: output_filename
+ 
+@@ -456,7 +456,7 @@ call set_dielectric_function_frequency([zero,zero])
+ 
+ call cpu_time(time1)
+ output_filename = 'EIGENVALUES_EXACT.dat'
+-call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_k, kmax_exact, &
++call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_k, nseeds, kmax_exact, &
+ output_filename, Lbasis_exact, alpha_exact, beta_exact)
+ 
+ 
+@@ -471,7 +471,7 @@ call write_timing_log(timing_string,time)
+ call cpu_time(time1)
+ call setup_Pk_model(zero,second_model_parameter)
+ output_filename = 'EIGENVALUES_MODEL.dat'
+-call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_model_operator, kmax_model, output_filename,&
++call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_model_operator, nseeds, kmax_model, output_filename,&
+ Lbasis_model, alpha_model, beta_model)
+ call cpu_time(time2)
+ time = time2-time1
