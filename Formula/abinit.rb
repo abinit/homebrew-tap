@@ -14,7 +14,7 @@ class Abinit < Formula
     sha256 cellar: :any, monterey: "63eb6b663f144827ceffdd5a3fc56753946454220e780beee51b9aca6a0efaf8"
     sha256 cellar: :any, big_sur: "f0fcf9b6967cdeaa93b40eda9d723360ae73a8a9ab2d02336232a7632ba5f46a"
     sha256 cellar: :any, catalina: "fb4600c4495d3f7004b4d917b21722fa33b6b94eabf32c00644da50dc81eef93"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "753caa49dc219ae52eec7601a7cf01f25c573db64a56c8066104a690ac9ea615"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "91c6e9a58b0bc6ffeda427201bd238a475d4afceacee940bc65e7c629001ac1e"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
