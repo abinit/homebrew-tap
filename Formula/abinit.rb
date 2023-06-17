@@ -1,20 +1,20 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-9.8.2.tar.gz"
-  sha256 "63be31cc8e9cb99e4b2d82be15c37e7a36512437d17c7d37f44042d6fec7c9bc"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-9.8.4.tar.gz"
+  sha256 "a086d5045f0093b432e6a044d5f71f7edf5a41a62d67b3677cb0751d330c564a"
   license "GPL-3.0-only"
-  revision 1
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "db26da5df2bdb749d4bad150f165dcf46f12624ae2f23145c79cbb469b5edf49"
-    sha256 cellar: :any, arm64_monterey: "1b76e1e059db45d16798d965f76b00d5fff26b6f9c6cc426d51a48473a5104be"
-    sha256 cellar: :any, ventura: "f9ca1c6c8dd81c1680999b0ff66c0c32c21507b24927f952ef7217532cafff76"
-    sha256 cellar: :any, monterey: "63eb6b663f144827ceffdd5a3fc56753946454220e780beee51b9aca6a0efaf8"
-    sha256 cellar: :any, big_sur: "f0fcf9b6967cdeaa93b40eda9d723360ae73a8a9ab2d02336232a7632ba5f46a"
-    sha256 cellar: :any, catalina: "fb4600c4495d3f7004b4d917b21722fa33b6b94eabf32c00644da50dc81eef93"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "91c6e9a58b0bc6ffeda427201bd238a475d4afceacee940bc65e7c629001ac1e"
+    sha256 cellar: :any, arm64_ventura: "bea062467cb604bf111fc093bd11032c473c0bfdb7d40cf54b9a99bc243505b2"
+    sha256 cellar: :any, arm64_monterey: "383dc528cae73cf4d142c7837de63c641fc00f5a25689cda366aeed50db8832c"
+    sha256 cellar: :any, ventura: "4664de0c0776e52a686f2779fe894bead3990b3b83142ad3856c8e4803568eed"
+    sha256 cellar: :any, monterey: "027dc1774f6e74ee16750f9b1a5631a9db3c2c399c4e8f500c069b8c825b59a8"
+    sha256 cellar: :any, big_sur: "e04cbb8594c95d8ccf938d9f4f17c373741371ea58563e9da5e252182f4c98ab"
+    sha256 cellar: :any, catalina: "886ff3441e7b1e3298fcde075970c48f3e361d3e6ab089ffdac1b41d73544a82"
+    sha256 cellar: :any, mojave: "c770c6a316242ee5a7570dba8585fce39d862c043645b199adea642ec0860c8d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "ac2a0a6f2d8f14a2fab1b0fe882c74556f8c54e2268b8a1ca9c7ce194f9e448d"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
