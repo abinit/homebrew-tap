@@ -14,8 +14,7 @@ brew install abinit
 *Notes:*
 
 - *Always use the latest Homebrew version (use* `brew upgrade`*).*
-- *Bottles for all macOS versions and hardware (intel and `Mac Silicon` arm64) are not always provided. If so, abinit will be built on the fly during installation process. The build only takes 6' on a Macbook M1 (2020).*
-- `abinit v8` *is still accessible via* `brew install abinit8`*.*
+- *Bottles for all macOS versions and hardware (Intel and `Mac Silicon` arm64) are not always provided. If so, abinit will be built on the fly during installation process. The build only takes 5' on a Macbook M1 (2022).*
 
 > If you experience difficulties with precompiled bottles (following an update of homebrew, for example), you can force the re-compilation of abinit:
 > ```brew install --build-from-source abinit```
@@ -24,7 +23,7 @@ brew install abinit
 
 ## Installing post-processing tool `AGATE`
 
-This tap also contains [agate](https://github.com/piti-diablotin/agate) and its Qt interface [qAgate](https://github.com/piti-diablotin/qAgate).
+This tap also contains [agate](https://github.com/piti-diablotin/agate) (`A`binit `G`raphical `A`nalysis `T`ool `E`ngine) and its Qt interface [qAgate](https://github.com/piti-diablotin/qAgate).
 You can install `agate` with
 
 ```
