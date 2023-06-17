@@ -2,21 +2,20 @@ class NetcdfFortranParallel < Formula
   # Adapted from official netcdf-fortran formula to use MPI I/O
   desc "Fortran libraries and utilities for NetCDF (parallel version)"
   homepage "https://www.unidata.ucar.edu/software/netcdf/"
-  url "https://downloads.unidata.ucar.edu/netcdf-fortran/4.6.0/netcdf-fortran-4.6.0.tar.gz"
-  sha256 "198bff6534cc85a121adc9e12f1c4bc53406c403bda331775a1291509e7b2f23"
-  license "BSD-3-Clause"
-  revision 1
+  url "https://downloads.unidata.ucar.edu/netcdf-fortran/4.6.1/netcdf-fortran-4.6.1.tar.gz"
+  sha256 "b50b0c72b8b16b140201a020936aa8aeda5c79cf265c55160986cd637807a37a"
+  license "NetCDF"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "c5cc27bf78f5432b597655f213bee641a1f73392b5a63bdfb47bdd5028d87fe6"
-    sha256 cellar: :any, arm64_monterey: "a5c0b44f9fe741895d2d2c0a164dee86095a23edc87a334af6a1693825f2d95d"
-    sha256 cellar: :any, ventura: "39fd198694c084b95db73b18a818b9c136cc7052a7eee563aaa8d49621d8075b"
-    sha256 cellar: :any, monterey: "a01ef08872f3a624919ad9c63e4c4197a553b47027b273b154963bd245231667"
-    sha256 cellar: :any, big_sur: "83b0170c87fd37ab3a2db190a350db17a0c59c46a0a16ba28ffef29d5b967824"
-    sha256 cellar: :any, catalina: "ee107175b883e77fcb08f411b95c5dfd32af1fd77a22c576f8056be25e943af0"
-    sha256 cellar: :any, mojave: "f5fa69d70c436bfce9fbf638ef4a14cb1bf1929777e0f5a9dc2fa4f3f2c97628"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "7651d1cf3cc7aa4dd2a1b3bbe58a1187ea077158d7758a93662b66d0d139e962"
+    sha256 cellar: :any, arm64_ventura: "55dddbf2b653f243cbe61377314bae52384a0ff6bbd67658d3fc53c096c91507"
+    sha256 cellar: :any, arm64_monterey: "658b6bf45526c7fd72731adde052c4d6dd5377656535530c749e75a12398a963"
+    sha256 cellar: :any, ventura: "2f9d0be493e7fb148a486611f3f4c042ff1521d833ce034b514749b002cea8ce"
+    sha256 cellar: :any, monterey: "f2f06355798b3c96afbd467158f9d6c0ca817632f06157e6510d539f9a6bb601"
+    sha256 cellar: :any, big_sur: "fee671911bfd5912d9aceeeb4e30da62880e5a2e68480c28ba64a2a87da0a949"
+    sha256 cellar: :any, catalina: "e2fdde0b0277917d08f63230ad2d1894c8e064d8ba8128df9c79b935bf423284"
+    sha256 cellar: :any, mojave: "390775ad8b9f3acb4cd067ef340c3195f118cd6064ddbfced915bdea89460f2a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "3278f6a97f57f87b9bd203d0e20ee76f70dee57e074ebef822a56b1f8f7a5c9b"
   end
 
   keg_only "conflict with serial netcdf-fortran packages"
@@ -45,9 +44,6 @@ class NetcdfFortranParallel < Formula
     system "cmake", "--build", "build_static"
     lib.install "build_static/fortran/libnetcdff.a"
 
-    # Remove shim paths
-    # inreplace [bin/"nf-config", lib/"libnetcdff.settings", lib/"pkgconfig/netcdf-fortran.pc"],
-    #  Superenv.shims_path/ENV.cc, ENV.cc
   end
 
   test do
