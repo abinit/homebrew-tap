@@ -23,40 +23,33 @@ brew install abinit
 
 ## Installing post-processing tool `AGATE`
 
-This tap also contains [agate](https://github.com/piti-diablotin/agate) (`A`binit `G`raphical `A`nalysis `T`ool `E`ngine) and its Qt interface [qAgate](https://github.com/piti-diablotin/qAgate).
+This tap also contains [agate](https://github.com/piti-diablotin/agate) (**A**binit **G**raphical **A**nalysis **T**ool `E`ngine) and its Qt interface [qAgate](https://github.com/piti-diablotin/qAgate).
 You can install `agate` with
-
 ```
-brew install agate # with gnuplot support
-# or
-brew install agate --without-gnuplot # without gnuplot support
+brew install agate
 ```
-
-*You can still install gnuplot later if you wish.*
-
-Independently, you can install qAgate with
+Independently, you can install `qAgate` (graphical interface for `agate`) with
 ```
-brew install --cask qagate # Recommanded  precompiled version
-#or
-brew install qagate # Formulae that compiles qAgate
+brew install qagate
 ```
+The `.app` will be place in `${HOMEBREW_PREFIX}/opt/qagate/bin`
+To make the app appear in the launcher, you can then make a symlink to `/Applications/`. Just type: `ln -s ${HOMEBREW_PREFIX}/opt/qagate/bin/qAgate.app /Applications`.
 
-In the case of the `Formulae`, the `.app` will be place in `/usr/local/Cellar/qagate/X.X.X/bin`
-You can then make a symlink to `/Applications/` if you want.
-
-For instance for version 1.1.1 `ln -s /usr/local/Cellar/qagate/1.1.1/bin/qAgate.app /Applications/`.
-The app will then appear in the launcher.
-
-In the case of the `cask` nothing has to be done. The app will be in the launcher.
+You also can install `qagate` via a `cask`(a precompiled version):
+```
+brew install --cask qagate
+```
+The app will directly appear in the launcher.
+> Note: the `cask` doesn't work correctly on Retina Display.
 
 ## Building bottles
 *This section is for the* `abinit maintainers`*...*
 
 Homebrew formulae can include compiled binaries, which it calls "bottles". To build a new bottle (perhaps for a new operating system or Abinit release):
 
-1. `brew install --build-bottle abinit --with-testsuite`
+1. `brew install --build-bottle abinit` (or `brew install --build-bottle abinit --with-testsuite` to install the whole test suite).
 1. `brew bottle abinit --keep-old --root-url=http://forge.abinit.org/homebrew` and note the lines of output it gives you (root_url, sha256, etc.).
-1. Rename the bottle to use a single hyphen (e.g. `abinit--8.10.3.catalina.bottle.tar.gz` to  `abinit-8.10.3.catalina.bottle.tar.gz`). On linux, `run sha256sum` on the renamed file, and use the result to replace the bottle hash from previous item.
+1. Rename the bottle to use a single hyphen (e.g. `abinit--9.10.1.catalina.bottle.tar.gz` to  `abinit-9.10.1.catalina.bottle.tar.gz`). On linux, `run sha256sum` on the renamed file, and use the result to replace the bottle hash from previous item.
 1. Upload the resulting file to http://forge.abinit.org/homebrew.
 1. Update the `abinit` formula with the bottle SHA and tag, in the bottle section with the custom URL.
 
