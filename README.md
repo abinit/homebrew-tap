@@ -40,7 +40,7 @@ You also can install `qagate` via a `cask`(a precompiled version):
 brew install --cask qagate
 ```
 The app will directly appear in the launcher.
-> Note: the `cask` doesn't work correctly on Retina Display.
+> Note: if macOS complains because `qAgate` is from an unidentified developer, [allow it in the MacOS settings](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac).
 
 ## Building bottles
 *This section is for the* `abinit maintainers`*...*
