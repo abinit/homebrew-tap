@@ -1,19 +1,19 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-9.10.1.tar.gz"
-  sha256 "136f0ffcc10b36b6e577132092d31e42b3c00f57098854fc15e5cf988b687997"
+  url "https://www.abinit.org/sites/default/files/packages/abinit-9.10.3.tar.gz"
+  sha256 "3f2a9aebbf1fee9855a09dd687f88d2317b8b8e04f97b2628ab96fb898dce49b"
   license "GPL-3.0-only"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_ventura: "480542841f6f5df4f672bf5d58731799388e873991d485d719b806fa1e63989c"
-    sha256 cellar: :any, arm64_monterey: "3bffdbbc33f4f47792a75b8d3dcd88d80694f7ad3d869c26b1754b0066512205"
-    sha256 cellar: :any, ventura: "4aac750d2d5b84f25fedb5e39e93ff250bcc266cb0934fd15cae6fa061e2223c"
-    sha256 cellar: :any, monterey: "ddb60d57c78b110808c45984b44e652376e26da8d5998ee3059a6cecaac032fe"
-    sha256 cellar: :any, big_sur: "828bc2e138a4a2e3c5e54586ede8390f856be6721a786e24d6d9731b65dfccd3"
-    sha256 cellar: :any, catalina: "f9ecfcedad1addc87d31918b54f8219b6ad819feafcce508ac6ccc96819379e6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "8faed673518b9b833b893a366ee5c770ce343818b2e0d9fdd2706471efb29a7e"
+    sha256 cellar: :any, arm64_ventura: "f5d148c85408de2f8077bcb51d17aeb4da618d6bdf685d36781c62db93cc31bb"
+    sha256 cellar: :any, arm64_monterey: "513ca3d7b299c8b5d1d39d1330ab8282ff8220dd835e7b42ac4827612ed7f6b8"
+    sha256 cellar: :any, ventura: "a557f549f7c99f49bc551bff47ab3929544c3b1bfdf80824083d9d1336ca69be"
+    sha256 cellar: :any, monterey: "0bca7894357bb7cbb3c57d7fe35419b25323cfeefe3d6a5f326ff344902a2a0a"
+    sha256 cellar: :any, big_sur: "0b1a6e59f04194b1c0057aacef878b3284b2d68c208e59b6f81d939af6721e91"
+    sha256 cellar: :any, catalina: "f65cbdfa048b8e759fa9013bade18297be99db563edf6f2c6145f09a5c713c91"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "d20af4be1cf331efda6589f5d6fa43143663d1e76ec282d96a4092aa4a1eb7dd"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
