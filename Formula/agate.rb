@@ -1,8 +1,8 @@
 class Agate < Formula
   desc "Agate is a Graphical Analysis Tool Engine for DFT calculations"
   homepage "https://github.com/piti-diablotin/agate"
-  url "https://github.com/piti-diablotin/agate/releases/download/v1.3.4/agate-1.3.4.tar.gz"
-  sha256 "2a30c0dca6cdfe4001662200563ece3c59cf5e05f2354386413037b3866abe39"
+  url "https://github.com/piti-diablotin/agate/releases/download/v1.4.1/agate-1.4.1.tar.gz"
+  sha256 "e8eb8c08b24a15baa4219d81695296aee0131666042d5b6a13138f0dd39deccf"
   license "GPL-3.0"
 
 # Tests are optional: bad idea but temporary hack
@@ -25,16 +25,9 @@ class Agate < Formula
   depends_on "yaml-cpp" => :build
   depends_on "readline" => :build
   depends_on "icu4c" => :build
-# depends_on "gnuplot" => :optional
+  depends_on "gnuplot" => :recommended
 
   def install
-
-    #Dirty hack to adjust window size
-    if OS.mac?
-      inreplace "src/window/winglfw3.cpp",
-                "glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);",
-                "_width/=3; _height=_width; glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);"
-    end
 
     # Remove unrecognized options if warned by configure
     system "./autogen.sh"

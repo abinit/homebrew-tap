@@ -1,14 +1,10 @@
 cask "qagate" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "1.2.3"
-  sha256 arm:   "c9ebf02d6a8943acccb63746451dda62b77f8027863f6167cff8158f70814c41",
-         intel: "f0df5e0bf8fcce79f46654b437aaaf4e25e3cafeb042591466d1ab9e0e655942"
+  version "1.3.0"
+  sha256 arm:   "13942ae6acacb61cdfb4ee789a7a97b3c9debb248d4b56a7cd652a7b2d97270d",
+         intel: "e5a9826ba6344ca2f65dfb864bda24845c7dad0a17a3c88ed9da55e2ccb83e59"
 
-# To create the dmg file:
-#   brew install qagate
-#   cd $(brew --prefix)/Cellar/qagate/*/bin
-#   $(brew --prefix)/Cellar/qt@5/*/bin/macdeployqt qAgate.app -dmg
   url "http://forge.abinit.org/homebrew/qAgate-#{version}-#{arch}.dmg"
 
   name "qAgate"
@@ -19,3 +15,8 @@ cask "qagate" do
 
   app "qAgate.app"
 end
+
+# NOTE
+# To create the dmg file:
+#   brew reinstall qagate
+#   $(brew --prefix)/Library/Taps/abinit/homebrew-tap/Casks/tools/make_qagate_dmg.sh 
