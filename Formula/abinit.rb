@@ -45,12 +45,18 @@ class Abinit < Formula
       CXX=mpicxx
       FC=mpifort
     ]
-    compilers << "FCFLAGS_EXTRA=-fallow-argument-mismatch -Wno-missing-include-dirs"
 
-    # This is temporary
-    compilers << "CFLAGS=-g -O2 -march=native"
-    compilers << "CXXFLAGS=-g -O2 -march=native"
+    #compilers << "FCFLAGS_EXTRA=-fallow-argument-mismatch -Wno-missing-include-dirs"
     compilers << "FCFLAGS=-g -O2 -march=native -fallow-argument-mismatch -Wno-missing-include-dirs"
+
+    # mpicc (clang) <15 does not accept -march on arm
+    if OS.mac? && Hardware::CPU.arm? && (DevelopmentTools.clang_build_version < 1500)
+      compilers << "CFLAGS=-g -O2"
+      compilers << "CXXFLAGS=-g -O2"
+    else
+      compilers << "CFLAGS=-g -O2 -march=native"
+      compilers << "CXXFLAGS=-g -O2 -march=native"
+    end
 
     args = %W[
       --prefix=#{prefix}
