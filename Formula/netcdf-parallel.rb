@@ -8,12 +8,14 @@ class NetcdfParallel < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_sonoma: "2fd26dbf3127b44df312fea26ebb49812c6bceb3004ce08fb9892608b66e65a8"
+    sha256 cellar: :any, arm64_sequoia: "dbff1521f40bf79d413e6fe6a8f6889c05f5aa0e8bed69b822d0701183b7e818"
+    sha256 cellar: :any, arm64_sonoma: "5247f0a689db48121daf1f02aef3f46381e86c3797b40ef8deed3f7c5bcab3ee"
     sha256 cellar: :any, arm64_monterey: "76f961b7cbb9f246e81e73b868497e1fc6c1a2c6d29bb005ab3bdb63684c2d1e"
     sha256 cellar: :any, arm64_ventura: "470c818028479c2563b05d322aecfb6a16dbb17b8b645571fcae7fc9b82eeef1"
-    sha256 cellar: :any, sonoma: "72eb608b2ecc829a2b0f1bc73c8d43e1e1fdd10ba5cf7fe3a0c436faed32fa0a"
-    sha256 cellar: :any, monterey: "386c27d5a02a900f8693b5043992359a710efa70d770ff6180f7b33b321cbb85"
+    sha256 cellar: :any, sequoia: "cd29da87495361637f0b71e5d11a76ecee292456fb49d15b1c29856f01f9fa34"
+    sha256 cellar: :any, sonoma: "9afa66759f20740fa6743329e5a80980b6aaf9ebe9ea2188115afdf338e09bcf"
     sha256 cellar: :any, ventura: "37b48a22899266e3164fbc7b7f423a52fd3639477dd6afad75d3501dba7297d3"
+    sha256 cellar: :any, monterey: "386c27d5a02a900f8693b5043992359a710efa70d770ff6180f7b33b321cbb85"
     sha256 cellar: :any, big_sur: "914d46cd4aa81e1876df008681fd87a252185d8a6c42d6815f81b337bca9170f"
     sha256 cellar: :any, catalina: "ec4c6105a88ea7b2465f8dc7a198909d928e1362e68e96c25c68a08848a6267f"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "99e8e252524ade6f23a6f786c2aed877d9d22bc577cf73252cf7890ca8d88b40"

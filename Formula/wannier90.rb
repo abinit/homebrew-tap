@@ -7,10 +7,12 @@ class Wannier90 < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_sonoma: "33f1e6ec25faaf31aea12e09f918c802ed1217f4bceb7b40c74c63f49624d3cd"
+    sha256 cellar: :any, arm64_sequoia: "58f601d4c2dfbc652e286aef315f1d42f44813a4bde73612e724731f9b34f1d6"
+    sha256 cellar: :any, arm64_sonoma: "d66b9d7aacf21299e0eed6e790b429b45a4c6d2aeccd9822be38adab442d398e"
     sha256 cellar: :any, arm64_monterey: "7fd98a631af65046836ed8dce48b0c1268bb9527f8273e0a1f9804902ad6b4cf"
     sha256 cellar: :any, arm64_ventura: "07b2ec165b4e1537d6c6d92f5f77e6ffeefe1b4eafcda2ce6b603c17ad256a2d"
-    sha256 cellar: :any, sonoma: "a457d3d90374d1a829c84412be323090c8e84952c8fbf184c0a1f7cbda0a27a0"
+    sha256 cellar: :any, sequoia: "5df1401bd1d1c8306ac5cd070dc125eb425623be6ab74d68eed5407a68115e16"
+    sha256 cellar: :any, sonoma: "784dc801ec06ba745d387886d6503dd37d74115be37c90ff6bc0129c73b482e6"
     sha256 cellar: :any, monterey: "3ed0079cd1934c28d8de88a8b204e62aeca478b83830983f58ad3aa30bbbd788"
     sha256 cellar: :any, ventura: "b9bcd7b1321ae3a8adc72fd744889126d048dbbe1161d4ec43953c1036e56a23"
     sha256 cellar: :any, big_sur: "080e4c2843a1e93b613a269ad043bc757fd3be1e93676494b36f7a8083d231f7"

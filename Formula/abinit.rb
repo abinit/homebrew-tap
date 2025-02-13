@@ -1,21 +1,21 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://www.abinit.org/sites/default/files/packages/abinit-10.0.5.tar.gz"
-  sha256 "07fed4df03ae32178933373b990bbda4431ea836fc7bebec05b17e4267bb7f4e"
+  url "https://forge.abinit.org/abinit-10.2.5.tar.gz"
+  sha256 "4f72fa457056617e6ed94db21264507eda66cc50224c7ed96b990d6b82de9ac1"
   license "GPL-3.0-only"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_sonoma: "ce0e37b3fef4cf377241d273f5bd9a45a3ec80e6ac5a535dddf90d363c8b399a"
-    sha256 cellar: :any, arm64_ventura: "67fafbfa079a12306e3251b37702b9ac96d4267a8f4ac07eb4a7c5535412f1d2"
-    sha256 cellar: :any, arm64_monterey: "a5744b1b8f50018abef66e4c88267a92c89163812e0dad411af8c431566ec4fa"
-    sha256 cellar: :any, sonoma: "df2d2066d3b4aa81191fd488f140a577e74e544e1f27d541e2826b2720543112"
-    sha256 cellar: :any, monterey: "d6dad30672e8fa2ffff1fe17a9a3bccfd0e9c44d354a901a316364b657576d36"
-    sha256 cellar: :any, ventura: "4e43e1c012dbebba6bce530b66e00174d5a6bff2a8ccf4be0c5480530600491b"
-    sha256 cellar: :any, big_sur: "ead8d6d4209a2c61b5823319b2322e3ed100425195efa8592dd9c113b847e896"
-    sha256 cellar: :any, catalina: "1663ca4f30e67904a933a9ed72f0cffb16e58babb6cdc9925cd971f6499eda50"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "fd4953210bd307f5a0523cbfcbc0ed8abe4e9d4809601ce71be36ab77037da42"
+    sha256 cellar: :any, arm64_sequoia: "78644576f441fa7aede6ac143b104143df9a0dd1a0d415bb08916554ac7b1ae4"
+    sha256 cellar: :any, arm64_sonoma: "f29a11ab8c89d283f9c45a39e0d867c59a514c19281d8860ad13f98577e92e00"
+    sha256 cellar: :any, arm64_ventura: "65d616642d62b9e348f1c6e9ff8b88ead532402dbfa344c8fb989907bb9b423b"
+    sha256 cellar: :any, arm64_monterey: "ff9e2bd6446a601b23feea1a53d2c0c154d59c9599f6fee7ad6ca538f83d1727"
+    sha256 cellar: :any, sequoia: "467d078c5828e2820b538317c92c1a045e784538819af967cc1cc687214d4ff4"
+    sha256 cellar: :any, sonoma: "4e1f4f6f87610650ac9848a307625bef69a98172196a341f37322a595db04ab8"
+    sha256 cellar: :any, ventura: "ab2b231c3dc386f4bf2a3d837298dd6de6775acbeccdef2a121669b7958fc576"
+    sha256 cellar: :any, monterey: "afa70051b320fa6cd4af264eafb30d6d1c360e15a086a26e517c6326a49f3075"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "cd623d2d17ae1e071fcc96746ce257a623087bd470eac675aed82815d95afaad"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -33,7 +33,7 @@ class Abinit < Formula
   depends_on "wannier90" => :recommended
   depends_on "netcdf-fortran-parallel" => :optional
 
-  conflicts_with "abinit8", because: "abinit 9 and abinit 8 share the same executables"
+  conflicts_with "abinit8", because: "abinit 9/10 and abinit 8 share the same executables"
 
   def install
     ENV.delete "CC"
@@ -49,12 +49,15 @@ class Abinit < Formula
 
     compilers << "FCFLAGS_EXTRA=-fallow-argument-mismatch -Wno-missing-include-dirs"
 
-    # On arm mpicc (clang) does not handle correctly -march and -mtune
-    if OS.mac? && Hardware::CPU.arm? 
-      inreplace "configure", "-mtune=native -march=native", "-march=native"
+    # mpicc (clang) does not handle correctly -march, -mtune and mcpu
+    if OS.mac? && Hardware::CPU.arm?
+      #inreplace "configure", "-mtune=native -march=native", "-march=native"
       if (DevelopmentTools.clang_build_version < 1500)
         inreplace "configure", "-march=native", ""
       end
+    end
+    if OS.mac? && Hardware::CPU.intel? 
+      inreplace "configure", "-mtune=native -mcpu=native", "-mtune=native"
     end
 
     args = %W[
