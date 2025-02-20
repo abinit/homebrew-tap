@@ -1,21 +1,21 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://forge.abinit.org/abinit-10.2.5.tar.gz"
-  sha256 "4f72fa457056617e6ed94db21264507eda66cc50224c7ed96b990d6b82de9ac1"
+  url "https://forge.abinit.org/abinit-10.2.7.tar.gz"
+  sha256 "e0e1049b01b4ebaec29be632cd554caeccb4b2a8acf2e148c8ac505e6b226dc1"
   license "GPL-3.0-only"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_sequoia: "78644576f441fa7aede6ac143b104143df9a0dd1a0d415bb08916554ac7b1ae4"
-    sha256 cellar: :any, arm64_sonoma: "f29a11ab8c89d283f9c45a39e0d867c59a514c19281d8860ad13f98577e92e00"
-    sha256 cellar: :any, arm64_ventura: "65d616642d62b9e348f1c6e9ff8b88ead532402dbfa344c8fb989907bb9b423b"
-    sha256 cellar: :any, arm64_monterey: "ff9e2bd6446a601b23feea1a53d2c0c154d59c9599f6fee7ad6ca538f83d1727"
-    sha256 cellar: :any, sequoia: "467d078c5828e2820b538317c92c1a045e784538819af967cc1cc687214d4ff4"
-    sha256 cellar: :any, sonoma: "4e1f4f6f87610650ac9848a307625bef69a98172196a341f37322a595db04ab8"
-    sha256 cellar: :any, ventura: "ab2b231c3dc386f4bf2a3d837298dd6de6775acbeccdef2a121669b7958fc576"
-    sha256 cellar: :any, monterey: "afa70051b320fa6cd4af264eafb30d6d1c360e15a086a26e517c6326a49f3075"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "cd623d2d17ae1e071fcc96746ce257a623087bd470eac675aed82815d95afaad"
+    sha256 cellar: :any, arm64_sequoia: "31c7af920b923ddf07bfb6a13c79dfd4a33fb33a781d73819193c9df605fcedf"
+    sha256 cellar: :any, arm64_sonoma: "66eae18fe4f85507d73a4511786fb7c7925a796254b3ccf55df55a81f5f9c582"
+    sha256 cellar: :any, arm64_ventura: "c8a03a41cd162fed1134d8b17ee39b6123509cfc7201c1227f66480bd124a9a3"
+    sha256 cellar: :any, arm64_monterey: "d93974913a6a0b00c100b5523692b589332667d6846ff4aea67a7cbcb0e0d1cf"
+    sha256 cellar: :any, sequoia: "4f30749c451a9925e830cda6b14de0eb308b522a833488eb2587435d53f71cfa"
+    sha256 cellar: :any, sonoma: "924da9f5b62f342f339027f1d3b5ea1b88881a63852b481092b86c74b41536fd"
+    sha256 cellar: :any, ventura: "f801f58c1db2a891d835840a3ce4f0e9fcb8e1d8df716c65d7a5e88059d80581"
+    sha256 cellar: :any, monterey: "f4bc8a6bcb9043182c7103e6b368e819beacd75594fa6af6d9fd41a11d0a8528"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "67caa8118770661f32834a69c95c16c9038fd6ff1a45f74ef3500ef3b3a70d8a"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
