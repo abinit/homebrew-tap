@@ -7,15 +7,15 @@ class Abinit < Formula
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_sequoia: "31c7af920b923ddf07bfb6a13c79dfd4a33fb33a781d73819193c9df605fcedf"
-    sha256 cellar: :any, arm64_sonoma: "66eae18fe4f85507d73a4511786fb7c7925a796254b3ccf55df55a81f5f9c582"
-    sha256 cellar: :any, arm64_ventura: "c8a03a41cd162fed1134d8b17ee39b6123509cfc7201c1227f66480bd124a9a3"
-    sha256 cellar: :any, arm64_monterey: "d93974913a6a0b00c100b5523692b589332667d6846ff4aea67a7cbcb0e0d1cf"
-    sha256 cellar: :any, sequoia: "4f30749c451a9925e830cda6b14de0eb308b522a833488eb2587435d53f71cfa"
-    sha256 cellar: :any, sonoma: "924da9f5b62f342f339027f1d3b5ea1b88881a63852b481092b86c74b41536fd"
-    sha256 cellar: :any, ventura: "f801f58c1db2a891d835840a3ce4f0e9fcb8e1d8df716c65d7a5e88059d80581"
-    sha256 cellar: :any, monterey: "f4bc8a6bcb9043182c7103e6b368e819beacd75594fa6af6d9fd41a11d0a8528"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "67caa8118770661f32834a69c95c16c9038fd6ff1a45f74ef3500ef3b3a70d8a"
+    sha256 cellar: :any, arm64_sequoia: "89a3e2498c8e627442d5e3bee9708bcd6b4e74a381222f6568188e780e5ef54e"
+    sha256 cellar: :any, arm64_sonoma: "c601fe71943d44ab309ed7997ba8f39e025cce8be27c93b936db62df21cf8d95"
+    sha256 cellar: :any, arm64_ventura: "0abbd06b03ce3690edb4d134e51af82e451aedc777c1a7e392f52253c8fb6995"
+    sha256 cellar: :any, arm64_monterey: "06279673ad0ff3245d3d868a1ee78d5756ca1b8c636406567ddf4f97257381b6"
+    sha256 cellar: :any, sequoia: "01d1958f96c3870004e4e7fdb7b1ca955851e88ada22a9ebe194b38f18f5b4d4"
+    sha256 cellar: :any, sonoma: "7e6b5cf3547909237cbd6374303f4c5741e90596d56d87fa1ac5974a1e17cc97"
+    sha256 cellar: :any, ventura: "bb2e96c6baeffd23cd7c0b73a8e54ab26c03a38ca6ab0ad985bc8fc80b851c09"
+    sha256 cellar: :any, monterey: "a35b4dd5fddf156c483864334af505433497687bd6244e64986346606f5623ea"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "afcdb111b2cd632649037e0ea54327272f3b46a243f391b45d11f6898b52034d"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
