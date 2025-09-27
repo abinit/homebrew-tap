@@ -2,23 +2,23 @@ class NetcdfFortranParallel < Formula
   # Adapted from official netcdf-fortran formula to use MPI I/O
   desc "Fortran libraries and utilities for NetCDF (parallel version)"
   homepage "https://www.unidata.ucar.edu/software/netcdf/"
-  url "https://downloads.unidata.ucar.edu/netcdf-fortran/4.6.1/netcdf-fortran-4.6.1.tar.gz"
-  sha256 "b50b0c72b8b16b140201a020936aa8aeda5c79cf265c55160986cd637807a37a"
+  url "https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v4.6.2.tar.gz"
+  sha256 "44cc7b5626b0b054a8503b8fe7c1b0ac4e0a79a69dad792c212454906a9224ca"
   license "NetCDF"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_sequoia: "23d761ede60323e0dfa15e2a295daac1bca1b173f2d315e795d76edbdc8bfb4d"
-    sha256 cellar: :any, arm64_sonoma: "85d01e49f53ed7787934ce148490ac01da4a0ff3d2b716038b098f2fed724b26"
-    sha256 cellar: :any, arm64_monterey: "4c33a391ee533104f3446b5ee34adfd1ea8e3e212ef088c94cd537316e995e72"
-    sha256 cellar: :any, arm64_ventura: "12fe4a39f729875c43939d6f6131db82d19c0262d9a25fbdf1ca56f9512fd7ce"
-    sha256 cellar: :any, sequoia: "f0a0f39bf45d259581784262345e090378f3f496fcb9258d11ae763604666e43"
-    sha256 cellar: :any, sonoma: "56927f0609d75c0ebec6acc1e41478f9d22021e44d96a97c05ccb0f6cadfecb0"
-    sha256 cellar: :any, ventura: "f026c6a2382e6d7f4111c48a50b19aded6785e4a2f342bb443cb9871cbd52354"
-    sha256 cellar: :any, monterey: "93c63b9205b8859c56f916e668334a4f49a27eb512fa36a0814d9b2d0d7ea330"
-    sha256 cellar: :any, big_sur: "ef7226fcff9a50acdb635b92d8c7970ceb78f72386768568531e68318408bdf1"
-    sha256 cellar: :any, catalina: "dfebdbd585b53feed39814d44b7c44bf34acf47ba74f785d0b2bec253fa42b02"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "cf5e3909b9e0d89d108a2a2abcc068f9c7023e370febdeb1aa27e9b7c0d2cde8"
+    sha256 cellar: :any, arm64_tahoe: "156e6f38c8829754cdaed7cff1a2af66f7c32526754cb12f0873c14891f90d61"
+    sha256 cellar: :any, arm64_sequoia: "080d9c424f6d93041d4475f189abfd4bcfa646b28f66bb3b31e288701fd3f716"
+    sha256 cellar: :any, arm64_sonoma: "7b107a5dcb15ca15bbb11a0bdb0b81160afc29889ce4a28f67407674b3026c70"
+    sha256 cellar: :any, arm64_ventura: "1868fd48057e89d45c2df08e85ef8a2198cba005e638efb9a0fb9753ba960ae5"
+    sha256 cellar: :any, arm64_monterey: "8fed2165df2cc2f9c33de0a1be7d3279a85e693a6c2658abe2d749c6171b1e85"
+    sha256 cellar: :any, tahoe: "fd15450f51be9dc980e42947ceb8446a14e425373a396389e4bee6604ff3cb7e"
+    sha256 cellar: :any, sequoia: "dca5a4d7873f5863ce447a075160ad54383ad0a805c4dbbf7669307e10772206"
+    sha256 cellar: :any, sonoma: "a7b2fa85edfda2c865a038654428e9f1cb911594d9580aab85866b9b9abba5ca"
+    sha256 cellar: :any, ventura: "b2413e50309b24b97057e33e2312b6c1bab2939fdeb7e8c4d3ae8e9850a74ca3"
+    sha256 cellar: :any, monterey: "1eaffe34a410ff26a35343488a01977ca783190829643fa0531c722f8b7fb63d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "6bdf2591152f710809aae6165a4ab968138e69a8ebbbe666bbbc5917f8e1410e"
   end
 
   keg_only "conflict with serial netcdf-fortran packages"
@@ -34,6 +34,7 @@ class NetcdfFortranParallel < Formula
                               -DCMAKE_C_COMPILER=mpicc
                               -DBUILD_TESTING=OFF
                               -DENABLE_TESTS=OFF
+                              -DENABLE_NETCDF_4=ON
                               -DENABLE_DOXYGEN=OFF]
 
     # Fixes wrong detection of netcdf-parallel
@@ -47,10 +48,13 @@ class NetcdfFortranParallel < Formula
     system "cmake", "--build", "build_static"
     lib.install "build_static/fortran/libnetcdff.a"
 
+    # Remove shim paths
+    #inreplace [bin/"nf-config", lib/"libnetcdff.settings", lib/"pkgconfig/netcdf-fortran.pc"],
+    #  Superenv.shims_path/ENV.cc, ENV.cc
   end
 
   test do
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       program test
         use netcdf
         integer :: ncid, varid, dimids(2)
@@ -68,7 +72,7 @@ class NetcdfFortranParallel < Formula
           if (status /= nf90_noerr) call abort
         end subroutine check
       end program test
-    EOS
+    FORTRAN
     system "gfortran", "test.f90", "-L#{lib}", "-I#{include}", "-lnetcdff",
                        "-o", "testf"
     system "./testf"

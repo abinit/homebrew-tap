@@ -2,23 +2,23 @@ class NetcdfParallel < Formula
   # Adapted from official netcdf formula to use MPI I/O
   desc "Libraries and data formats for array-oriented scientific data (parallel version)"
   homepage "https://www.unidata.ucar.edu/software/netcdf/"
-  url "https://downloads.unidata.ucar.edu/netcdf-c/4.9.2/netcdf-c-4.9.2.tar.gz"
-  sha256 "cf11babbbdb9963f09f55079e0b019f6d0371f52f8e1264a5ba8e9fdab1a6c48"
+  url "https://downloads.unidata.ucar.edu/netcdf-c/4.9.3/netcdf-c-4.9.3.tar.gz"
+  sha256 "a474149844e6144566673facf097fea253dc843c37bc0a7d3de047dc8adda5dd"
   license "BSD-3-Clause"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_sequoia: "dbff1521f40bf79d413e6fe6a8f6889c05f5aa0e8bed69b822d0701183b7e818"
-    sha256 cellar: :any, arm64_sonoma: "5247f0a689db48121daf1f02aef3f46381e86c3797b40ef8deed3f7c5bcab3ee"
-    sha256 cellar: :any, arm64_monterey: "76f961b7cbb9f246e81e73b868497e1fc6c1a2c6d29bb005ab3bdb63684c2d1e"
-    sha256 cellar: :any, arm64_ventura: "470c818028479c2563b05d322aecfb6a16dbb17b8b645571fcae7fc9b82eeef1"
-    sha256 cellar: :any, sequoia: "cd29da87495361637f0b71e5d11a76ecee292456fb49d15b1c29856f01f9fa34"
-    sha256 cellar: :any, sonoma: "9afa66759f20740fa6743329e5a80980b6aaf9ebe9ea2188115afdf338e09bcf"
-    sha256 cellar: :any, ventura: "37b48a22899266e3164fbc7b7f423a52fd3639477dd6afad75d3501dba7297d3"
-    sha256 cellar: :any, monterey: "386c27d5a02a900f8693b5043992359a710efa70d770ff6180f7b33b321cbb85"
-    sha256 cellar: :any, big_sur: "914d46cd4aa81e1876df008681fd87a252185d8a6c42d6815f81b337bca9170f"
-    sha256 cellar: :any, catalina: "ec4c6105a88ea7b2465f8dc7a198909d928e1362e68e96c25c68a08848a6267f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "99e8e252524ade6f23a6f786c2aed877d9d22bc577cf73252cf7890ca8d88b40"
+    sha256 cellar: :any, arm64_tahoe: "bd09d992d55df9dd08d0ef257d0e49150602d5d067f8d80978b2ef35b15fbb6c"
+    sha256 cellar: :any, arm64_sequoia: "380c8e704a087c5bc315290af2d01167c43424f2cafbe796e02588e83d329a8d"
+    sha256 cellar: :any, arm64_sonoma: "562d2e9124f45c2bbb1ba41078e8ff78923392669a7158e69ce69cdd7e5fa515"
+    sha256 cellar: :any, arm64_ventura: "667e43fd371fccb475d3aa066efe966664eb676442e9515c7ab586aa32a60d13"
+    sha256 cellar: :any, arm64_monterey: "076a395c7a436bacb11210798e3ddc61536d7544c3af2091c312ae06ffb41e99"
+    sha256 cellar: :any, tahoe: "9cbc85cd34cf59f5aa6dd33516e61b813fc80e5ae41e9cdc181184ec2819e282"
+    sha256 cellar: :any, sequoia: "619da5c53e5effa813009eff9053ce7dd3590f10a7129bcd1d611472656e7cdf"
+    sha256 cellar: :any, sonoma: "0d4502fdfad516bee185a19032eca6f2c85f2bb2403b75ee81d2bf23962cc8be"
+    sha256 cellar: :any, ventura: "095bd8d201ce2fded42a8640e428cc6254a18e41d91d94b6eb73667a3c739f20"
+    sha256 cellar: :any, monterey: "80aff1ffcbb54b121aa0a6288523cce788fb61ebde38c21f60ad00a08d4fcfdd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "86c31ed9c9830a3e9e646124467f45d5179628d3f6942eb586b0b10c7193a1db"
   end
 
   keg_only "conflict with serial netcdf and pnetcdf packages"
@@ -31,7 +31,10 @@ class NetcdfParallel < Formula
   uses_from_macos "bzip2"
   uses_from_macos "curl"
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
+
+  on_macos do
+    depends_on "zstd"
+  end
 
   def install
 
@@ -54,12 +57,15 @@ class NetcdfParallel < Formula
     system "cmake", "--install", "build_shared"
     system "cmake", "-S", ".", "-B", "build_static", *args, "-DBUILD_SHARED_LIBS=OFF"
     system "cmake", "--build", "build_static"
-    lib.install "build_static/liblib/libnetcdf.a"
+    lib.install "build_static/libnetcdf.a"
 
+    # Remove shim paths
+    #inreplace [bin/"nc-config", lib/"pkgconfig/netcdf.pc", lib/"cmake/netCDF/netCDFConfig.cmake",
+    #           lib/"libnetcdf.settings"], Superenv.shims_path/ENV.cc, ENV.cc
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include "netcdf_meta.h"
       int main()
@@ -67,7 +73,7 @@ class NetcdfParallel < Formula
         printf(NC_VERSION);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-I#{include}", "-lnetcdf",
                    "-o", "test"
     if head?
