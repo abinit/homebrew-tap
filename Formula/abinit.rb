@@ -1,23 +1,21 @@
 class Abinit < Formula
   desc "Atomic-scale first-principles simulation software"
   homepage "https://www.abinit.org/"
-  url "https://forge.abinit.org/abinit-10.4.7.tar.gz"
-  sha256 "161c60ef90686c19e0718363eb5a17bfa29494e5fbdc59be45a7342e20349768"
+  url "https://forge.abinit.org/abinit-10.8.3.tar.gz"
+  sha256 "cfad7f1c1bfa90c2fac3dca02f8d4d1c7aaf7d6e0d3bba24c091185d559c503b"
   license "GPL-3.0-only"
 
   bottle do
     root_url "http://forge.abinit.org/homebrew"
-    sha256 cellar: :any, arm64_tahoe: "8696434b2d3960cfda9f2331eedf198a1ed742e31a9fec29996e7414beee4516"
-    sha256 cellar: :any, arm64_sequoia: "e0355cc455fb6dd2e38d9da99337611f341dbb89b99fd6bcc12675c657654e73"
-    sha256 cellar: :any, arm64_sonoma: "b8aa56048aa7e59db8bb7c4dbeb0fc3524cff7ed0cf560fe4be403787205781f"
-    sha256 cellar: :any, arm64_ventura: "5d7dd1e821b7a069ed9d3e61ffe2fc57b98bc762a9ea6b1b8e924de222fc4e52"
-    sha256 cellar: :any, arm64_monterey: "e07a6d465e4da64a0a3ba8da634b90e536570a7a466796413865fbca0db50393"
-    sha256 cellar: :any, tahoe: "3ae678e059ca52c46c5075b1be55f43f25650807d47c42c126a5efaef6bd09e8"
-    sha256 cellar: :any, sequoia: "c2f401551e112fb0d0d4eba0ee269d477f076982757e1d76ba3962c8abfc010f"
-    sha256 cellar: :any, sonoma: "9efbfc74deceadb248904ae36f8a2cf44ecb0bd9209987818e4bafe487fa9384"
-    sha256 cellar: :any, ventura: "e481aa48a0fe78389f57dafd1c6f4dd144b72e4f7cde178dd3e5a0db4052436d"
-    sha256 cellar: :any, monterey: "6e1f52e866a356a00b57d10a92f317688ee984747ea10e14cd285d6bc75a4908"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "3291e2b601c0404a2585287ae958a542dabcf294d665ae4fc87e51fab70caa03"
+    sha256 cellar: :any, arm64_golden_gate: "6b5362b1a5f4206bad73bc58dcd4587290bd467ee76e569dcc73256b5a070705"
+    sha256 cellar: :any, arm64_tahoe: "146ca0161b5b22f4a67c16db4139cfda6eb14593992ecff959390a62c128cd81"
+    sha256 cellar: :any, arm64_sequoia: "77f98c304c3708a87ab6c2384feed3b4988e76764f578ab01b7138397a87645b"
+    sha256 cellar: :any, arm64_sonoma: "9fd62c091039a7d0b7a70cfcbb48ca4bf47432758d7f11d329bd7905588b3cb0"
+#   sha256 cellar: :any, arm64_monterey: ""
+#   sha256 cellar: :any, tahoe: ""
+#   sha256 cellar: :any, sequoia: ""
+#   sha256 cellar: :any, sonoma: ""
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "c2a2524e5faa2dd63bba90043a7587d8311b1324974105855469b5076f695edd"
   end
 
   option "without-openmp", "Disable OpenMP multithreading"
@@ -62,7 +60,12 @@ class Abinit < Formula
       inreplace "configure", "-mtune=native -mcpu=native", "-mtune=native"
     end
 
-    args = %W[
+    # Defer annotation evaluation so tests/runtests.py runs within Python < 3.10
+    inreplace "tests/runtests.py",
+          "from __future__ import absolute_import",
+          "from __future__ import annotations, absolute_import"
+
+              args = %W[
       --prefix=#{prefix}
       --with-mpi=yes
       --enable-mpi-inplace=yes
