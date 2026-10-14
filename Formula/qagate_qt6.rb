@@ -1,5 +1,5 @@
 #WARNING: THIS FORMULA IS NOT COMPLETE: THERE IS STILL WORK TO PORT IT TO Qt6 !!! 
-class Qagate < Formula
+class QagateQt6 < Formula
   desc "Qt interface for agate"
   homepage "https://github.com/piti-diablotin/qAgate"
   url "https://github.com/piti-diablotin/qAgate/releases/download/v1.2.3/qAgate1.2.3.tar.gz"
